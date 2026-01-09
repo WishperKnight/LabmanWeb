@@ -10,8 +10,15 @@
 <body>
 <div class="d-flex">
     <div id="sidebar-container" style="width: 250px;"></div>
+
     <div class="flex-grow-1 p-4">
-        <h2 class="mb-4">Gestión de Equipos</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Gestión de Equipos</h2>
+            <button class="btn btn-teal" onclick="prepararCrearEquipo()">
+                <i class="fas fa-plus me-2"></i>Registrar Equipo
+            </button>
+        </div>
+
         <div class="content-card p-0 overflow-hidden">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -29,22 +36,134 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalEquipo" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="equipoModalTitle">Registrar Nuevo Equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEquipo">
+                    <input type="hidden" id="equipo-edit-index">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Equipo</label>
+                        <input type="text" id="e-nombre" class="form-control" placeholder="Ej. Secuenciador ADN" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ID del Equipo</label>
+                        <input type="text" id="e-id" class="form-control" placeholder="Ej. EQ-001" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estado</label>
+                            <select id="e-estado" class="form-select">
+                                <option value="Operativo">Operativo</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                                <option value="Fuera de Servicio">Fuera de Servicio</option>
+                                <option value="Alerta Temp">Alerta Temperatura</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Última Calibración</label>
+                            <input type="date" id="e-calibracion" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Responsable Académico</label>
+                        <input type="text" id="e-responsable" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-teal w-100" onclick="guardarEquipo()">Guardar Equipo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="data.js"></script>
 <script src="main.js"></script>
 <script>
-    const tbody = document.getElementById('lista-equipos');
-    equipos.forEach(e => {
-        let color = e.estado === 'Operativo' ? 'success' : (e.estado === 'Mantenimiento' ? 'warning' : 'danger');
-        tbody.innerHTML += `
-            <tr>
-                <td class="ps-4">${e.id}</td>
-                <td class="fw-bold">${e.nombre}</td>
-                <td><span class="badge bg-${color}">${e.estado}</span></td>
-                <td>${e.ultimaCalibracion}</td>
-                <td>${e.responsable}</td>
-                <td class="text-end pe-4"><button class="btn btn-sm btn-teal">Reportar Falla</button></td>
-            </tr>`;
-    });
+    const listaEquipos = document.getElementById('lista-equipos');
+    const modalEquipoWrap = new bootstrap.Modal(document.getElementById('modalEquipo'));
+
+    function renderEquipos() {
+        listaEquipos.innerHTML = '';
+        equipos.forEach((equipo, index) => {
+            let color = 'secondary';
+            if (equipo.estado === 'Operativo') color = 'success';
+            else if (equipo.estado === 'Mantenimiento') color = 'warning';
+            else if (equipo.estado === 'Fuera de Servicio') color = 'danger';
+            else if (equipo.estado === 'Alerta Temp') color = 'danger'; // Mantener alerta como peligro
+
+            listaEquipos.innerHTML += `
+                <tr>
+                    <td class="ps-4">${equipo.id}</td>
+                    <td class="fw-bold">${equipo.nombre}</td>
+                    <td><span class="badge bg-${color}">${equipo.estado}</span></td>
+                    <td>${equipo.ultimaCalibracion}</td>
+                    <td>${equipo.responsable}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="prepararEditarEquipo(${index})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarEquipo(${index})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    // Lógica para Crear Equipo
+    function prepararCrearEquipo() {
+        document.getElementById('formEquipo').reset();
+        document.getElementById('equipo-edit-index').value = "-1";
+        document.getElementById('equipoModalTitle').innerText = "Registrar Nuevo Equipo";
+        modalEquipoWrap.show();
+    }
+
+    // Lógica para Editar Equipo
+    function prepararEditarEquipo(index) {
+        const equipo = equipos[index];
+        document.getElementById('e-nombre').value = equipo.nombre;
+        document.getElementById('e-id').value = equipo.id;
+        document.getElementById('e-estado').value = equipo.estado;
+        document.getElementById('e-calibracion').value = equipo.ultimaCalibracion;
+        document.getElementById('e-responsable').value = equipo.responsable;
+        document.getElementById('equipo-edit-index').value = index;
+        document.getElementById('equipoModalTitle').innerText = `Editar Equipo: ${equipo.nombre}`;
+        modalEquipoWrap.show();
+    }
+
+    function guardarEquipo() {
+        const index = document.getElementById('equipo-edit-index').value;
+        const nuevoEquipo = {
+            id: document.getElementById('e-id').value,
+            nombre: document.getElementById('e-nombre').value,
+            estado: document.getElementById('e-estado').value,
+            ultimaCalibracion: document.getElementById('e-calibracion').value,
+            responsable: document.getElementById('e-responsable').value
+        };
+
+        if (index === "-1") {
+            equipos.unshift(nuevoEquipo); // Añadir al inicio
+        } else {
+            equipos[index] = nuevoEquipo; // Actualizar
+        }
+        
+        renderEquipos();
+        modalEquipoWrap.hide();
+    }
+
+    function eliminarEquipo(index) {
+        if(confirm("¿Seguro que deseas eliminar este equipo?")) {
+            equipos.splice(index, 1);
+            renderEquipos();
+        }
+    }
+
+    // Cargar los equipos al iniciar
+    renderEquipos();
 </script>
 </body>
 </html>

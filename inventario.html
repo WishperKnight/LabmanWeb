@@ -2,40 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Track - Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="d-flex">
-    <div class="sidebar d-flex flex-column flex-shrink-0 p-0" style="width: 250px;">
-        <div class="sidebar-brand">LAB TRACK</div>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-search me-2"></i> Search</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a></li>
-            <li><a href="inventario.html" class="nav-link active"><i class="fas fa-box me-2"></i> Inventario</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-flask me-2"></i> Equipos</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-dna me-2"></i> Ejecuciones</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-chart-bar me-2"></i> Reportes</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-users-cog me-2"></i> Admin</a></li>
-        </ul>
-    </div>
+    <div id="sidebar-container" style="width: 250px;"></div>
 
-    <div class="flex-grow-1 p-4" style="background-color: var(--bg-light); height: 100vh; overflow-y: auto;">
-        <h2 class="mb-4 text-dark">Inventario de Material</h2>
+    <div class="flex-grow-1 p-4">
+        <h2 class="mb-4">Inventario de Material</h2>
         
         <div class="content-card d-flex justify-content-between align-items-center mb-3 p-3">
             <div class="input-group w-25">
                 <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Buscar material...">
+                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Buscar...">
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-teal">Añadir Material</button>
-                <button class="btn btn-outline-secondary">Importar CSV</button>
-                <button class="btn btn-outline-secondary">Exportar Informe</button>
+                <button class="btn btn-teal" onclick="prepararCrear()">Añadir Material</button>
             </div>
         </div>
 
@@ -47,7 +32,6 @@
                         <th>Nombre</th>
                         <th>Stock Actual</th>
                         <th>Ubicación</th>
-                        <th>Ficha Técnica</th>
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
@@ -57,60 +41,104 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="data.js"></script> 
+<div class="modal fade" id="modalMaterial" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nuevo Material</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formMaterial">
+                    <input type="hidden" id="edit-index"> <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">Nombre</label><input type="text" id="m-nombre" class="form-control" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">ID / Lote</label><input type="text" id="m-id" class="form-control" required></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Stock</label><input type="text" id="m-stock" class="form-control" required></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Stock Mínimo</label><input type="number" id="m-min" class="form-control"></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Ubicación</label><input type="text" id="m-ubi" class="form-control"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-teal w-100" onclick="guardarMaterial()">Guardar Material</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="data.js"></script>
+<script src="main.js"></script>
 <script>
     const tabla = document.getElementById('tabla-body');
-    const searchInput = document.getElementById('searchInput');
+    const modalWrap = new bootstrap.Modal(document.getElementById('modalMaterial'));
 
-    // Función para renderizar la tabla
-    function renderTable(data) {
-        tabla.innerHTML = ''; // Limpiar tabla
-        
-        if (data.length === 0) {
-            tabla.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron resultados</td></tr>';
-            return;
-        }
-
-        data.forEach(item => {
-            const fichaIcon = item.ficha 
-                ? '<i class="fas fa-file-pdf text-danger"></i> PDF' 
-                : '<span class="text-muted">-</span>';
-
-            // Nota: El link lleva a detalle.html?id=XXX
-            const row = `
+    function renderTable(lista) {
+        tabla.innerHTML = '';
+        lista.forEach((item, index) => {
+            tabla.innerHTML += `
                 <tr>
-                    <td class="ps-4 text-muted">${item.id}</td>
-                    <td><a href="detalle.html?id=${item.id}" class="text-decoration-none text-dark fw-bold">${item.nombre}</a></td>
+                    <td class="ps-4">${item.id}</td>
+                    <td><strong>${item.nombre}</strong></td>
                     <td>${item.stock}</td>
                     <td>${item.ubicacion}</td>
-                    <td>${fichaIcon}</td>
                     <td class="text-end pe-4">
-                        <a href="detalle.html?id=${item.id}" class="btn btn-sm btn-teal">Ver Ficha</a>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="prepararEditar(${index})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="eliminar(${index})"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
-            `;
-            tabla.innerHTML += row;
+                </tr>`;
         });
     }
 
-    // 1. Cargar tabla inicial
+    // Lógica para Crear
+    function prepararCrear() {
+        document.getElementById('formMaterial').reset();
+        document.getElementById('edit-index').value = "-1";
+        document.getElementById('modalTitle').innerText = "Nuevo Material";
+        modalWrap.show();
+    }
+
+    // Lógica para Editar
+    function prepararEditar(index) {
+        const item = materiales[index];
+        document.getElementById('m-nombre').value = item.nombre;
+        document.getElementById('m-id').value = item.id;
+        document.getElementById('m-stock').value = item.stock;
+        document.getElementById('m-min').value = item.stockMinimo;
+        document.getElementById('m-ubi').value = item.ubicacion;
+        document.getElementById('edit-index').value = index;
+        document.getElementById('modalTitle').innerText = "Editar Material";
+        modalWrap.show();
+    }
+
+    function guardarMaterial() {
+        const index = document.getElementById('edit-index').value;
+        const nuevo = {
+            id: document.getElementById('m-id').value,
+            nombre: document.getElementById('m-nombre').value,
+            stock: document.getElementById('m-stock').value,
+            ubicacion: document.getElementById('m-ubi').value,
+            stockMinimo: document.getElementById('m-min').value
+        };
+
+        if (index === "-1") {
+            materiales.unshift(nuevo); // Añadir al inicio
+        } else {
+            materiales[index] = nuevo; // Actualizar
+        }
+        
+        renderTable(materiales);
+        modalWrap.hide();
+    }
+
+    function eliminar(index) {
+        if(confirm("¿Seguro que deseas eliminar este material?")) {
+            materiales.splice(index, 1);
+            renderTable(materiales);
+        }
+    }
+
     renderTable(materiales);
-
-    // 2. Lógica del Buscador
-    searchInput.addEventListener('keyup', (e) => {
-        const termino = e.target.value.toLowerCase();
-        
-        // Filtramos por nombre o ID
-        const filtrados = materiales.filter(item => 
-            item.nombre.toLowerCase().includes(termino) || 
-            item.id.toString().includes(termino)
-        );
-        
-        renderTable(filtrados);
-    });
 </script>
-
 </body>
 </html>
