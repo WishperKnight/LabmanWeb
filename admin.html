@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Track - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -9,18 +10,45 @@
 </head>
 <body>
 <div class="d-flex">
-    <div id="sidebar-container" style="width: 250px;"></div>
-    <div class="flex-grow-1 p-4">
-        <div class="d-flex justify-content-between mb-4">
-            <h2>Usuarios del Sistema</h2>
-            <button class="btn btn-teal" data-bs-toggle="modal" data-bs-target="#modalUser">Registrar Usuario</button>
+    <div id="sidebar-container" style="width: 250px; background: #2c3e50; min-height: 100vh;">
+        <div class="p-3 text-white">
+            <h4>LAB TRACK</h4>
+            <hr>
+            <nav class="nav flex-column">
+                <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i>Dashboard</a>
+                <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i>Inventario</a>
+                <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i>Equipos</a>
+                <a href="#" class="nav-link text-white active fw-bold"><i class="fas fa-users-cog me-2"></i>Admin</a>
+            </nav>
         </div>
-        <div class="content-card p-0">
+    </div>
+
+    <div class="flex-grow-1 p-4" style="background-color: #f8f9fa;">
+        <div class="d-flex justify-content-between mb-4">
+            <h2>Panel de Administración</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalUser">
+                <i class="fas fa-user-plus me-2"></i>Crear Nuevo Usuario
+            </button>
+        </div>
+
+        <div class="alert alert-info small">
+            <i class="fas fa-info-circle me-2"></i> 
+            <strong>Nota:</strong> Al crear un usuario nuevo, Firebase cerrará tu sesión actual por seguridad del SDK. Deberás volver a loguearte con tu cuenta de admin.
+        </div>
+
+        <div class="content-card p-0 bg-white shadow-sm rounded overflow-hidden">
             <table class="table align-middle mb-0">
                 <thead class="table-light">
-                    <tr><th class="ps-4">Nombre</th><th>Rol</th><th>Correo</th><th>Último Acceso</th></tr>
+                    <tr>
+                        <th class="ps-4">Nombre</th>
+                        <th>Rol</th>
+                        <th>Correo</th>
+                        <th>ID de Usuario (UID)</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
                 </thead>
-                <tbody id="lista-usuarios"></tbody>
+                <tbody id="lista-usuarios">
+                    </tbody>
             </table>
         </div>
     </div>
@@ -29,39 +57,122 @@
 <div class="modal fade" id="modalUser" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5>Nuevo Usuario</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <div class="mb-3"><label>Nombre</label><input type="text" id="u-name" class="form-control"></div>
-                <div class="mb-3"><label>Correo</label><input type="email" id="u-mail" class="form-control"></div>
-                <div class="mb-3"><label>Rol</label><select id="u-rol" class="form-select"><option>Administrador</option><option>Técnico</option></select></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Usuario en Auth y Database</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-footer"><button class="btn btn-teal w-100" onclick="addUser()">Crear Usuario</button></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nombre Completo</label>
+                    <input type="text" id="u-name" class="form-control" placeholder="Ej: Dra. Elena Rossi">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Correo Electrónico</label>
+                    <input type="email" id="u-mail" class="form-control" placeholder="usuario@labtrack.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contraseña Temporal</label>
+                    <input type="password" id="u-pass" class="form-control" placeholder="Mínimo 6 caracteres">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rol de Acceso</label>
+                    <select id="u-rol" class="form-select">
+                        <option value="Técnico">Técnico</option>
+                        <option value="Investigador">Investigador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary w-50" onclick="addUserFull()">Crear Usuario</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="data.js"></script>
-<script src="main.js"></script>
-<script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
+        authDomain: "labmanager-b85b1.firebaseapp.com",
+        projectId: "labmanager-b85b1",
+        storageBucket: "labmanager-b85b1.firebasestorage.app",
+        messagingSenderId: "651630503448",
+        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const usersRef = collection(db, "usuarios");
+
     const uList = document.getElementById('lista-usuarios');
-    function renderUsers() {
+
+    // 1. CARGAR LISTA DE PERFILES DESDE FIRESTORE
+    onSnapshot(usersRef, (snapshot) => {
         uList.innerHTML = '';
-        usuarios.forEach(u => {
-            uList.innerHTML += `<tr><td class="ps-4 fw-bold">${u.nombre}</td><td>${u.rol}</td><td>${u.correo}</td><td>${u.ultimoAcceso || 'Nunca'}</td></tr>`;
+        snapshot.forEach(docSnap => {
+            const u = docSnap.data();
+            const id = docSnap.id;
+            uList.innerHTML += `
+                <tr>
+                    <td class="ps-4 fw-bold">${u.nombre}</td>
+                    <td><span class="badge bg-secondary">${u.rol}</span></td>
+                    <td>${u.correo}</td>
+                    <td class="text-muted small">${u.uid || 'N/A'}</td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUserProfile('${id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
         });
-    }
-    function addUser() {
-        usuarios.push({
-            nombre: document.getElementById('u-name').value,
-            rol: document.getElementById('u-rol').value,
-            correo: document.getElementById('u-mail').value,
-            ultimoAcceso: 'Recién creado'
-        });
-        renderUsers();
-        bootstrap.Modal.getInstance(document.getElementById('modalUser')).hide();
-    }
-    renderUsers();
+    });
+
+    // 2. CREAR USUARIO EN AUTH Y FIRESTORE
+    window.addUserFull = async () => {
+        const name = document.getElementById('u-name').value;
+        const mail = document.getElementById('u-mail').value;
+        const pass = document.getElementById('u-pass').value;
+        const rol = document.getElementById('u-rol').value;
+
+        if(!name || !mail || !pass) return alert("Completa todos los campos");
+
+        try {
+            // A. Crear en Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(auth, mail, pass);
+            const user = userCredential.user;
+
+            // B. Crear Perfil en Firestore vinculado por UID
+            await addDoc(usersRef, {
+                uid: user.uid,
+                nombre: name,
+                correo: mail,
+                rol: rol,
+                fechaCreacion: new Date().toISOString()
+            });
+
+            alert("¡Usuario creado con éxito en Authentication y Database! Tu sesión se cerrará ahora.");
+            window.location.href = "index.html"; // Redirigir al login
+
+        } catch (e) {
+            console.error(e);
+            alert("Error: " + e.message);
+        }
+    };
+
+    // 3. ELIMINAR PERFIL (Solo borra de Firestore)
+    window.deleteUserProfile = async (id) => {
+        if(confirm("¿Eliminar perfil de la base de datos?")) {
+            await deleteDoc(doc(db, "usuarios", id));
+        }
+    };
 </script>
 </body>
 </html>

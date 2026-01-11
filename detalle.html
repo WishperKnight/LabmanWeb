@@ -11,82 +11,84 @@
 <body>
 
 <div class="d-flex">
-    <div class="sidebar d-flex flex-column flex-shrink-0 p-0" style="width: 250px;">
-        <div class="sidebar-brand">LAB TRACK</div>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-search me-2"></i> Search</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-home me-2"></i> Dashboard</a></li>
-            <li><a href="inventario.html" class="nav-link active"><i class="fas fa-box me-2"></i> Inventario</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-flask me-2"></i> Equipos</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-dna me-2"></i> Ejecuciones</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-chart-bar me-2"></i> Reportes</a></li>
-            <li><a href="#" class="nav-link"><i class="fas fa-users-cog me-2"></i> Admin</a></li>
+    <div class="sidebar d-flex flex-column flex-shrink-0 p-0" style="width: 250px; background: #2c3e50; min-height: 100vh;">
+        <div class="sidebar-brand p-3 text-white fw-bold">LAB TRACK</div>
+        <ul class="nav nav-pills flex-column mb-auto px-2">
+            <li><a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a></li>
+            <li><a href="inventario.html" class="nav-link active text-white"><i class="fas fa-box me-2"></i> Inventario</a></li>
         </ul>
     </div>
 
-    <div class="flex-grow-1 p-4" style="background-color: var(--bg-light); height: 100vh; overflow-y: auto;">
+    <div class="flex-grow-1 p-4" style="background-color: #f8f9fa; min-height: 100vh; overflow-y: auto;">
         
         <a href="inventario.html" class="text-decoration-none text-muted mb-3 d-inline-block">
             <i class="fas fa-arrow-left"></i> Volver al inventario
         </a>
 
-        <h3 class="mb-3">Detalle de Material: <span id="header-nombre">Cargando...</span></h3>
-        
-        <div class="mb-4">
-            <button class="btn btn-teal me-2">Editar Material</button>
-            <button class="btn btn-danger" onclick="alert('Esta es una demo, no se puede borrar realmente.')">Eliminar Material</button>
+        <div id="loading-spinner" class="text-center py-5">
+            <div class="spinner-border text-teal" role="status"></div>
+            <p>Cargando información del material...</p>
         </div>
 
-        <div class="row">
-            <div class="col-md-7">
-                <div class="content-card">
-                    <h5 class="mb-4">Información General</h5>
-                    
-                    <div class="row mb-3 border-bottom pb-2">
-                        <div class="col-6 text-muted">ID</div>
-                        <div class="col-6 fw-bold" id="info-id">...</div>
-                    </div>
-                    <div class="row mb-3 border-bottom pb-2">
-                        <div class="col-6 text-muted">Nombre</div>
-                        <div class="col-6 fw-bold" id="info-nombre">...</div>
-                    </div>
-                     <div class="row mb-3 border-bottom pb-2">
-                        <div class="col-6 text-muted">Stock Actual</div>
-                        <div class="col-6 fw-bold" id="info-stock">...</div>
-                    </div>
-                     <div class="row mb-3 border-bottom pb-2">
-                        <div class="col-6 text-muted">Ubicación</div>
-                        <div class="col-6 fw-bold" id="info-ubicacion">...</div>
-                    </div>
-                     <div class="row mb-2">
-                        <div class="col-6 text-muted">Stock Mínimo</div>
-                        <div class="col-6 fw-bold" id="info-minimo">...</div>
-                    </div>
-                </div>
+        <div id="main-content" style="display: none;">
+            <h3 class="mb-3">Detalle de Material: <span id="header-nombre">...</span></h3>
+            
+            <div class="mb-4">
+                <button class="btn btn-teal me-2" id="btn-editar">Editar Material</button>
+                <button class="btn btn-danger" id="btn-eliminar-real">Eliminar Material</button>
             </div>
 
-            <div class="col-md-5">
-                <div class="content-card mb-4 text-center">
-                    <h5 class="mb-3 text-start">Ficha Técnica</h5>
-                    <div class="p-3 border rounded bg-light d-flex align-items-center justify-content-center gap-3">
-                         <i class="far fa-file-pdf fa-2x text-muted"></i>
-                         <button id="btn-descargar" class="btn btn-teal">Descargar Ficha Técnica</button>
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="content-card bg-white p-4 shadow-sm rounded">
+                        <h5 class="mb-4">Información General</h5>
+                        
+                        <div class="row mb-3 border-bottom pb-2">
+                            <div class="col-6 text-muted">ID / Lote</div>
+                            <div class="col-6 fw-bold" id="info-id">...</div>
+                        </div>
+                        <div class="row mb-3 border-bottom pb-2">
+                            <div class="col-6 text-muted">Nombre</div>
+                            <div class="col-6 fw-bold" id="info-nombre">...</div>
+                        </div>
+                         <div class="row mb-3 border-bottom pb-2">
+                            <div class="col-6 text-muted">Stock Actual</div>
+                            <div class="col-6 fw-bold" id="info-stock">...</div>
+                        </div>
+                         <div class="row mb-3 border-bottom pb-2">
+                            <div class="col-6 text-muted">Ubicación</div>
+                            <div class="col-6 fw-bold" id="info-ubicacion">...</div>
+                        </div>
+                         <div class="row mb-2">
+                            <div class="col-6 text-muted">Stock Mínimo</div>
+                            <div class="col-6 fw-bold" id="info-minimo">...</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="content-card">
-                    <h5 class="mb-3">Historial de Uso Reciente</h5>
-                    <table class="table table-sm text-center">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Cantidad</th>
-                                <th>Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-historial">
-                            </tbody>
-                    </table>
+                <div class="col-md-5">
+                    <div class="content-card mb-4 text-center bg-white p-4 shadow-sm rounded">
+                        <h5 class="mb-3 text-start">Ficha Técnica</h5>
+                        <div class="p-3 border rounded bg-light d-flex align-items-center justify-content-center gap-3">
+                             <i class="far fa-file-pdf fa-2x text-danger"></i>
+                             <button id="btn-descargar" class="btn btn-teal">Descargar Ficha Técnica</button>
+                        </div>
+                    </div>
+
+                    <div class="content-card bg-white p-4 shadow-sm rounded">
+                        <h5 class="mb-3">Historial de Uso Reciente</h5>
+                        <table class="table table-sm text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cantidad</th>
+                                    <th>Usuario</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-historial">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -94,58 +96,83 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="data.js"></script>
-<script>
-    // 1. Obtener el ID de la URL
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
+        authDomain: "labmanager-b85b1.firebaseapp.com",
+        projectId: "labmanager-b85b1",
+        storageBucket: "labmanager-b85b1.firebasestorage.app",
+        messagingSenderId: "651630503448",
+        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 1. Obtener el ID de Firebase desde la URL
     const params = new URLSearchParams(window.location.search);
-    const idBuscado = parseInt(params.get('id'));
+    const docId = params.get('id');
 
-    // 2. Buscar en data.js
-    const material = materiales.find(m => m.id === idBuscado);
-
-    if (material) {
-        // Rellenar datos
-        document.getElementById('header-nombre').innerText = material.nombre;
-        document.getElementById('info-id').innerText = material.id;
-        document.getElementById('info-nombre').innerText = material.nombre;
-        document.getElementById('info-stock').innerText = material.stock;
-        document.getElementById('info-ubicacion').innerText = material.ubicacion;
-        document.getElementById('info-minimo').innerText = material.stockMinimo;
-
-        // Botón PDF
-        const btnDescarga = document.getElementById('btn-descargar');
-        if (!material.ficha) {
-            btnDescarga.classList.add('disabled', 'btn-secondary');
-            btnDescarga.classList.remove('btn-teal');
-            btnDescarga.innerText = "No disponible";
+    async function cargarDetalle() {
+        if (!docId) {
+            mostrarError("ID de material no proporcionado.");
+            return;
         }
 
-        // Tabla Historial
-        const tablaHistorial = document.getElementById('tabla-historial');
-        if (material.historial && material.historial.length > 0) {
-            material.historial.forEach(h => {
-                tablaHistorial.innerHTML += `
-                    <tr>
-                        <td class="small">${h.fecha}</td>
-                        <td>${h.cantidad}</td>
-                        <td>${h.usuario}</td>
-                    </tr>
-                `;
-            });
-        } else {
-            tablaHistorial.innerHTML = '<tr><td colspan="3" class="text-muted small py-3">Sin movimientos recientes</td></tr>';
-        }
+        try {
+            const docRef = doc(db, "inventario", docId);
+            const docSnap = await getDoc(docRef);
 
-    } else {
-        // Error si el ID no existe
+            if (docSnap.exists()) {
+                const material = docSnap.data();
+                
+                // Rellenar la UI
+                document.getElementById('header-nombre').innerText = material.nombre;
+                document.getElementById('info-id').innerText = material.codigo || "Sin ID";
+                document.getElementById('info-nombre').innerText = material.nombre;
+                document.getElementById('info-stock').innerText = material.stock;
+                document.getElementById('info-ubicacion').innerText = material.ubicacion || "No asignada";
+                document.getElementById('info-minimo').innerText = material.stockMinimo || "0";
+
+                // Historial (Simulado o desde Firebase si tienes la subcolección)
+                const tablaHistorial = document.getElementById('tabla-historial');
+                tablaHistorial.innerHTML = '<tr><td colspan="3" class="text-muted small py-3">Sin movimientos registrados en Firebase</td></tr>';
+
+                // Mostrar contenido y ocultar spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                mostrarError("El material no existe en la base de datos.");
+            }
+        } catch (error) {
+            console.error("Error al cargar:", error);
+            mostrarError("Error de conexión con la base de datos.");
+        }
+    }
+
+    function mostrarError(msj) {
         document.querySelector('.flex-grow-1').innerHTML = `
             <div class="alert alert-danger m-5 text-center">
-                <h4>Error 404</h4>
-                <p>El material con ID ${idBuscado || 'desconocido'} no existe.</p>
+                <h4>Ups! Algo salió mal</h4>
+                <p>${msj}</p>
                 <a href="inventario.html" class="btn btn-outline-danger">Volver al inventario</a>
             </div>`;
     }
-</script>
 
+    // Botón Eliminar Real
+    document.getElementById('btn-eliminar-real').addEventListener('click', async () => {
+        if (confirm("¿Estás seguro de que deseas eliminar este material permanentemente de Firebase?")) {
+            await deleteDoc(doc(db, "inventario", docId));
+            window.location.href = "inventario.html";
+        }
+    });
+
+    // Iniciar carga
+    cargarDetalle();
+</script>
 </body>
 </html>

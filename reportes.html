@@ -5,56 +5,62 @@
     <title>Lab Track - Reportes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="d-flex">
-    <div id="sidebar-container" style="width: 250px;"></div>
+    <div id="sidebar-container" style="width: 250px; background: #2c3e50; min-height: 100vh;">
+        <div class="p-3 text-white">
+            <h4>LAB TRACK</h4>
+            <hr>
+            <nav class="nav flex-column">
+                <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i>Dashboard</a>
+                <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i>Inventario</a>
+                <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i>Equipos</a>
+                <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i>Ejecuciones</a>
+                <a href="#" class="nav-link text-white active fw-bold"><i class="fas fa-chart-bar me-2"></i>Reportes</a>
+                <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i>Admin</a>
+            </nav>
+        </div>
+    </div>
 
-    <div class="flex-grow-1 p-4">
+    <div class="flex-grow-1 p-4" style="background-color: #f8f9fa;">
         <h2 class="mb-4">Generación de Informes</h2>
         
         <div class="row">
             <div class="col-md-4">
-                <div class="content-card">
+                <div class="content-card bg-white p-4 shadow-sm rounded">
                     <h5>Configurar Reporte</h5>
                     <hr>
                     <div class="mb-3">
                         <label class="form-label">Tipo de Informe</label>
                         <select id="tipo-reporte" class="form-select">
-                            <option value="inventario">Inventario de Stock</option>
-                            <option value="uso">Consumo de Reactivos</option>
+                            <option value="inventario">Inventario de Stock Actual</option>
                             <option value="equipos">Estado de Equipos</option>
+                            <option value="ejecuciones">Bitácora de Ejecuciones</option>
                         </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rango de Fecha</label>
-                        <input type="date" class="form-control mb-2">
-                        <input type="date" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Formato de Salida</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="fmt" checked>
-                            <label class="form-check-label">PDF (.pdf)</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="fmt">
-                            <label class="form-check-label">Excel (.xlsx)</label>
+                            <input class="form-check-input" type="radio" name="fmt" id="fmtPdf" checked>
+                            <label class="form-check-label" for="fmtPdf">Documento PDF (.pdf)</label>
                         </div>
                     </div>
-                    <button class="btn btn-teal w-100" onclick="simularGenerar()">
-                        <i class="fas fa-file-download me-2"></i>Generar Informe
+                    <button class="btn btn-primary w-100" id="btn-generar">
+                        <i class="fas fa-file-download me-2"></i>Generar e Imprimir
                     </button>
                 </div>
             </div>
 
             <div class="col-md-8">
-                <div class="content-card">
-                    <h5>Vista Previa Reciente</h5>
+                <div class="content-card bg-white p-4 shadow-sm rounded h-100">
+                    <h5>Vista Previa y Registro</h5>
                     <div id="preview-container" class="text-center py-5 border rounded bg-light">
-                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Selecciona los parámetros y haz clic en generar para ver la previsualización.</p>
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Los reportes generados se basan en los datos en tiempo real de tu base de datos Firebase.</p>
                     </div>
                 </div>
             </div>
@@ -62,32 +68,101 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="main.js"></script>
-<script>
-    function simularGenerar() {
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
+        authDomain: "labmanager-b85b1.firebaseapp.com",
+        projectId: "labmanager-b85b1",
+        storageBucket: "labmanager-b85b1.firebasestorage.app",
+        messagingSenderId: "651630503448",
+        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const btnGenerar = document.getElementById('btn-generar');
+    const container = document.getElementById('preview-container');
+
+    btnGenerar.addEventListener('click', async () => {
         const tipo = document.getElementById('tipo-reporte').value;
-        const container = document.getElementById('preview-container');
         
+        // Efecto visual de carga
         container.innerHTML = `
-            <div class="spinner-border text-teal mb-3" role="status"></div>
-            <p>Procesando datos del laboratorio...</p>
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <p>Consultando base de datos Firebase...</p>
         `;
 
-        setTimeout(() => {
+        try {
+            const querySnapshot = await getDocs(collection(db, tipo));
+            const data = [];
+            querySnapshot.forEach((doc) => {
+                data.push({ id: doc.id, ...doc.data() });
+            });
+
+            if (data.length === 0) {
+                container.innerHTML = `<div class="alert alert-warning">No hay datos suficientes para generar este reporte.</div>`;
+                return;
+            }
+
+            generarPDF(tipo, data);
+
             container.innerHTML = `
                 <div class="alert alert-success mx-4">
-                    <i class="fas fa-check-circle me-2"></i> Informe de ${tipo} generado con éxito.
+                    <i class="fas fa-check-circle me-2"></i> Reporte de <strong>${tipo}</strong> generado correctamente.
                 </div>
                 <div class="p-4 border mx-4 bg-white shadow-sm text-start">
-                    <h6>LAB TRACK - Reporte Oficial</h6>
-                    <small class="text-muted">Fecha: 09/01/2026</small>
+                    <h6>LAB TRACK - Reporte Generado</h6>
+                    <small class="text-muted">ID de Sesión: ${Math.random().toString(36).substr(2, 9)}</small>
                     <hr>
-                    <p>Resumen de actividades encontradas: <strong>24 registros</strong></p>
-                    <button class="btn btn-sm btn-outline-dark">Abrir archivo</button>
+                    <p>Se han procesado <strong>${data.length}</strong> registros encontrados en Firestore.</p>
+                    <p class="small text-muted">El archivo se ha descargado automáticamente en tu navegador.</p>
                 </div>
             `;
-        }, 1500);
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `<div class="alert alert-danger">Error al conectar con Firebase.</div>`;
+        }
+    });
+
+    function generarPDF(titulo, lista) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Encabezado
+        doc.setFontSize(18);
+        doc.text("LAB TRACK - SISTEMA DE GESTIÓN", 14, 20);
+        doc.setFontSize(12);
+        doc.text(`Reporte de: ${titulo.toUpperCase()}`, 14, 30);
+        doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 38);
+        
+        // Preparar datos según el tipo
+        let columns = [];
+        let rows = [];
+
+        if (titulo === 'inventario') {
+            columns = ["Nombre", "Stock", "Ubicación", "Mínimo"];
+            rows = lista.map(item => [item.nombre, item.stock, item.ubicacion || 'N/A', item.stockMinimo || '0']);
+        } else if (titulo === 'equipos') {
+            columns = ["Equipo", "Estado", "Responsable", "Calibración"];
+            rows = lista.map(item => [item.nombre, item.estado, item.responsable, item.ultimaCalibracion]);
+        } else {
+            columns = ["ID", "Protocolo", "Resultado", "Fecha"];
+            rows = lista.map(item => [item.id.substring(0,5), item.prueba, item.resultado, item.fecha]);
+        }
+
+        doc.autoTable({
+            startY: 45,
+            head: [columns],
+            body: rows,
+            theme: 'striped',
+            headStyles: { fillColor: [44, 62, 80] }
+        });
+
+        doc.save(`Reporte_${titulo}_${Date.now()}.pdf`);
     }
 </script>
 </body>

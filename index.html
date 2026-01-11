@@ -16,21 +16,93 @@
                 <i class="fas fa-microscope"></i>
             </div>
             <h3 class="mb-4">Bienvenido</h3>
-            <form action="inventario.html"> <div class="mb-3 input-group">
-                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
-                    <input type="text" class="form-control border-start-0 ps-0" placeholder="Nombre de usuario">
+            
+            <form id="loginForm"> 
+                <div class="mb-3 input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+                    <input type="email" id="email" class="form-control border-start-0 ps-0" placeholder="Correo electrónico" required>
                 </div>
                 <div class="mb-4 input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
-                    <input type="password" class="form-control border-start-0 ps-0" placeholder="Contraseña">
+                    <input type="password" id="password" class="form-control border-start-0 ps-0" placeholder="Contraseña" required>
                 </div>
-                <button type="submit" class="btn btn-teal w-100 py-2">Iniciar Sesión</button>
+                
+                <div id="errorMessage" class="alert alert-danger small py-2" style="display: none;"></div>
+
+                <button type="submit" id="btnLogin" class="btn btn-teal w-100 py-2">Iniciar Sesión</button>
             </form>
+
             <div class="mt-3">
                 <a href="#" class="text-muted small text-decoration-none">¿Olvidaste tu contraseña?</a>
             </div>
         </div>
     </div>
 
+    <script type="module">
+        // Importaciones necesarias
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+        // Tu configuración de Lab Manager
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
+            authDomain: "labmanager-b85b1.firebaseapp.com",
+            projectId: "labmanager-b85b1",
+            storageBucket: "labmanager-b85b1.firebasestorage.app",
+            messagingSenderId: "651630503448",
+            appId: "1:651630503448:web:9a327cbf30b84fd763c56d",
+            measurementId: "G-S5P154NG6D"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
+
+        // Referencias del DOM
+        const loginForm = document.getElementById('loginForm');
+        const errorDiv = document.getElementById('errorMessage');
+        const btnLogin = document.getElementById('btnLogin');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Estado visual de carga
+            errorDiv.style.display = 'none';
+            btnLogin.disabled = true;
+            btnLogin.textContent = "Verificando...";
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // Si el login es correcto, va al dashboard
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                console.error("Error:", error.code);
+                errorDiv.style.display = 'block';
+                
+                // Traducción de errores comunes
+                switch (error.code) {
+                    case 'auth/invalid-credential':
+                        errorDiv.textContent = "Correo o contraseña incorrectos.";
+                        break;
+                    case 'auth/user-not-found':
+                        errorDiv.textContent = "Usuario no registrado.";
+                        break;
+                    case 'auth/wrong-password':
+                        errorDiv.textContent = "Contraseña incorrecta.";
+                        break;
+                    default:
+                        errorDiv.textContent = "Error al iniciar sesión. Inténtalo de nuevo.";
+                }
+            } finally {
+                btnLogin.disabled = false;
+                btnLogin.textContent = "Iniciar Sesión";
+            }
+        });
+    </script>
 </body>
 </html>

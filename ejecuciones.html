@@ -9,29 +9,42 @@
 </head>
 <body>
 <div class="d-flex">
-    <div id="sidebar-container" style="width: 250px;"></div>
+    <div id="sidebar-container" style="width: 250px; background: #2c3e50; min-height: 100vh;">
+        <div class="p-3 text-white">
+            <h4>LAB TRACK</h4>
+            <hr>
+            <nav class="nav flex-column">
+                <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i>Dashboard</a>
+                <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i>Inventario</a>
+                <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i>Equipos</a>
+                <a href="#" class="nav-link text-white active fw-bold"><i class="fas fa-dna me-2"></i>Ejecuciones</a>
+                <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i>Admin</a>
+            </nav>
+        </div>
+    </div>
 
-    <div class="flex-grow-1 p-4">
+    <div class="flex-grow-1 p-4" style="background-color: #f8f9fa;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Ejecuciones y Pruebas</h2>
-            <button class="btn btn-teal" onclick="modalEjecucion.show()">
+            <button class="btn btn-primary" onclick="window.abrirModalEjecucion()">
                 <i class="fas fa-vial me-2"></i>Nueva Ejecución
             </button>
         </div>
 
-        <div class="content-card p-0 overflow-hidden">
+        <div class="content-card p-0 overflow-hidden bg-white shadow-sm rounded">
             <table class="table table-hover align-middle mb-0 text-center">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Prueba / Protocolo</th>
+                        <th>ID de Registro</th>
+                        <th class="text-start">Prueba / Protocolo</th>
                         <th>Fecha</th>
                         <th>Estado/Resultado</th>
                         <th>Técnico</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
-                <tbody id="lista-ejecuciones"></tbody>
+                <tbody id="lista-ejecuciones">
+                    </tbody>
             </table>
         </div>
     </div>
@@ -40,69 +53,124 @@
 <div class="modal fade" id="modalEjecucion" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5>Iniciar Ejecución</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Iniciar Protocolo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Protocolo</label>
-                    <input type="text" id="ej-prueba" class="form-control" placeholder="Ej. PCR de muestra A1">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Resultado Esperado</label>
-                    <select id="ej-resultado" class="form-select">
-                        <option>En Proceso</option>
-                        <option>Exitoso</option>
-                        <option>Fallido</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Técnico Responsable</label>
-                    <input type="text" id="ej-tecnico" class="form-control" value="Admin Usuario">
-                </div>
+                <form id="formEjecucion">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Protocolo / Prueba</label>
+                        <input type="text" id="ej-prueba" class="form-control" placeholder="Ej. PCR de muestra A1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estado Inicial</label>
+                        <select id="ej-resultado" class="form-select">
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Exitoso">Exitoso</option>
+                            <option value="Fallido">Fallido</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Técnico Responsable</label>
+                        <input type="text" id="ej-tecnico" class="form-control" placeholder="Nombre del técnico">
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-teal w-100" onclick="guardarEjecucion()">Registrar Ejecución</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary w-50" onclick="window.guardarEjecucion()">Registrar en Bitácora</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="data.js"></script>
-<script src="main.js"></script>
-<script>
-    const modalEjecucion = new bootstrap.Modal(document.getElementById('modalEjecucion'));
-    const tabla = document.getElementById('lista-ejecuciones');
 
-    function renderEjecuciones() {
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
+        authDomain: "labmanager-b85b1.firebaseapp.com",
+        projectId: "labmanager-b85b1",
+        storageBucket: "labmanager-b85b1.firebasestorage.app",
+        messagingSenderId: "651630503448",
+        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const ejecucionesRef = collection(db, "ejecuciones");
+
+    const tabla = document.getElementById('lista-ejecuciones');
+    const modalInstance = new bootstrap.Modal(document.getElementById('modalEjecucion'));
+
+    // --- ESCUCHAR CAMBIOS EN TIEMPO REAL (Ordenados por fecha reciente) ---
+    const q = query(ejecucionesRef, orderBy("fechaISO", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
         tabla.innerHTML = '';
-        ejecuciones.forEach(ej => {
+        snapshot.forEach((docSnap) => {
+            const ej = docSnap.data();
+            const fireId = docSnap.id;
+            
             const badge = ej.resultado === 'Exitoso' ? 'success' : (ej.resultado === 'En Proceso' ? 'info' : 'danger');
+            
             tabla.innerHTML += `
                 <tr>
-                    <td><small class="text-muted">${ej.id}</small></td>
+                    <td><small class="text-muted">${fireId.substring(0,6).toUpperCase()}</small></td>
                     <td class="text-start fw-bold">${ej.prueba}</td>
                     <td>${ej.fecha}</td>
                     <td><span class="badge bg-${badge}">${ej.resultado}</span></td>
                     <td>${ej.tecnico}</td>
-                    <td><button class="btn btn-sm btn-light"><i class="fas fa-eye"></i></button></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.eliminarEjecucion('${fireId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
                 </tr>`;
         });
-    }
+    });
 
-    function guardarEjecucion() {
+    // --- FUNCIONES PARA EL USUARIO ---
+
+    window.abrirModalEjecucion = () => {
+        document.getElementById('formEjecucion').reset();
+        modalInstance.show();
+    };
+
+    window.guardarEjecucion = async () => {
+        const prueba = document.getElementById('ej-prueba').value;
+        const resultado = document.getElementById('ej-resultado').value;
+        const tecnico = document.getElementById('ej-tecnico').value;
+
+        if(!prueba) return alert("Por favor indica el nombre del protocolo");
+
         const nueva = {
-            id: "EJ-00" + (ejecuciones.length + 1),
-            prueba: document.getElementById('ej-prueba').value,
-            fecha: new Date().toISOString().split('T')[0],
-            resultado: document.getElementById('ej-resultado').value,
-            tecnico: document.getElementById('ej-tecnico').value
+            prueba: prueba,
+            fecha: new Date().toLocaleDateString(),
+            fechaISO: new Date().toISOString(), // Usado para ordenar correctamente
+            resultado: resultado,
+            tecnico: tecnico || "Usuario General"
         };
-        ejecuciones.unshift(nueva);
-        renderEjecuciones();
-        modalEjecucion.hide();
-    }
 
-    renderEjecuciones();
+        try {
+            await addDoc(ejecucionesRef, nueva);
+            modalInstance.hide();
+        } catch (e) {
+            alert("Error al guardar: " + e.message);
+        }
+    };
+
+    window.eliminarEjecucion = async (id) => {
+        if(confirm("¿Eliminar este registro de la bitácora?")) {
+            await deleteDoc(doc(db, "ejecuciones", id));
+        }
+    };
 </script>
 </body>
 </html>

@@ -2,79 +2,65 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Track - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        body { display: none; } 
+    </style>
 </head>
 <body>
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 250px;"></div>
 
-    <div class="flex-grow-1 p-4">
-        <h2 class="mb-4">Dashboard General</h2>
-        
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="content-card border-start border-primary border-4 text-center">
-                    <h6 class="text-muted">Materiales</h6>
-                    <h2 id="count-mat">0</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="content-card border-start border-success border-4 text-center">
-                    <h6 class="text-muted">Equipos Operativos</h6>
-                    <h2 id="count-eq">0</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="content-card border-start border-warning border-4 text-center">
-                    <h6 class="text-muted">Ejecuciones Hoy</h6>
-                    <h2 id="count-ej">0</h2>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="content-card border-start border-danger border-4 text-center">
-                    <h6 class="text-muted">Alertas Stock</h6>
-                    <h2 class="text-danger">2</h2>
-                </div>
-            </div>
+    <nav class="navbar navbar-dark bg-dark p-3">
+        <span class="navbar-brand">Lab Track Dashboard</span>
+        <button id="btnLogout" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+    </nav>
+
+    <div class="container mt-5">
+        <h1>Bienvenido, <span id="userEmail"></span></h1>
+        <p>Este es el panel de control de tu laboratorio.</p>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-md-8">
-                <div class="content-card">
-                    <h5>Uso de Reactivos (Últimos 6 meses)</h5>
-                    <canvas id="dashChart" style="max-height: 300px;"></canvas>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="content-card h-100">
-                    <h5>Actividad Reciente</h5>
-                    <ul class="list-group list-group-flush small" id="recent-activity">
-                        </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="data.js"></script>
-<script src="main.js"></script> <script>
-    // Lógica específica del Dashboard
-    document.getElementById('count-mat').innerText = materiales.length;
-    document.getElementById('count-eq').innerText = equipos.filter(e => e.estado === 'Operativo').length;
-    document.getElementById('count-ej').innerText = ejecuciones.length;
+        // Tu misma configuración de Lab Manager
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
+            authDomain: "labmanager-b85b1.firebaseapp.com",
+            projectId: "labmanager-b85b1",
+            storageBucket: "labmanager-b85b1.firebasestorage.app",
+            messagingSenderId: "651630503448",
+            appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
+        };
 
-    const ctx = document.getElementById('dashChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-            datasets: [{ label: 'Consumo', data: [12, 19, 15, 8, 22, 30], backgroundColor: '#2ecc71' }]
-        }
-    });
-</script>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // --- PROTECCIÓN DE RUTA ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuario está logueado
+                console.log("Acceso concedido:", user.email);
+                document.getElementById('userEmail').textContent = user.email;
+                document.body.style.display = "block"; // Mostramos la página
+            } else {
+                // No hay usuario, mandarlo al login
+                console.log("Acceso denegado, redirigiendo...");
+                window.location.href = "index.html"; 
+            }
+        });
+
+        // --- CERRAR SESIÓN ---
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                alert("Error al cerrar sesión");
+            });
+        });
+    </script>
 </body>
 </html>
