@@ -2,205 +2,98 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Track - Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>body { background-color: #f8f9fa; }</style>
 </head>
 <body>
-
 <div class="d-flex">
-    <div id="sidebar-container" style="width: 250px; background: #f8f9fa; min-height: 100vh;">
-        <div class="p-3">
-            <h4>Lab Track</h4>
-            <hr>
-            <a href="dashboard.html" class="d-block mb-2 text-decoration-none text-dark"><i class="fas fa-home me-2"></i>Inicio</a>
-            <a href="#" class="d-block mb-2 text-decoration-none text-teal fw-bold"><i class="fas fa-boxes me-2"></i>Inventario</a>
-        </div>
+    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
+        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
+        <nav class="nav flex-column gap-2">
+            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-box me-2"></i> Inventario</a>
+            <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i> Equipos</a>
+            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
+            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
+            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+        </nav>
     </div>
 
     <div class="flex-grow-1 p-4">
-        <h2 class="mb-4">Inventario de Material</h2>
-        
-        <div class="content-card d-flex justify-content-between align-items-center mb-3 p-3 bg-white shadow-sm rounded">
-            <div class="input-group w-25">
-                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Buscar...">
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" onclick="prepararCrear()">+ Añadir Material</button>
-            </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Control de Inventario</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalItem">
+                <i class="fas fa-plus me-2"></i>Nuevo Material
+            </button>
         </div>
 
-        <div class="content-card p-0 overflow-hidden bg-white shadow-sm rounded">
-            <table class="table table-hover mb-0 align-middle">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">ID / Lote</th>
-                        <th>Nombre</th>
-                        <th>Stock Actual</th>
+                        <th class="ps-4">Material</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
                         <th>Ubicación</th>
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="tabla-body">
-                    </tbody>
+                <tbody id="lista-inventario"></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalMaterial" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Nuevo Material</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formMaterial">
-                    <input type="hidden" id="edit-index"> 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" id="m-nombre" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">ID / Lote</label>
-                            <input type="text" id="m-id" class="form-control" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Stock</label>
-                            <input type="number" id="m-stock" class="form-control" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Stock Mínimo</label>
-                            <input type="number" id="m-min" class="form-control">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Ubicación</label>
-                            <input type="text" id="m-ubi" class="form-control" placeholder="Ej: Estante B1">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary w-50" onclick="guardarMaterial()">Guardar en Base de Datos</button>
-            </div>
+<div class="modal fade" id="modalItem" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header border-0"><h5>Registrar Material</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <input type="text" id="i-nombre" class="form-control mb-3" placeholder="Nombre">
+            <input type="number" id="i-stock" class="form-control mb-3" placeholder="Cantidad">
+            <select id="i-cat" class="form-select mb-3"><option>Reactivo</option><option>Consumible</option></select>
+            <button class="btn btn-primary w-100" onclick="guardarItem()">Guardar</button>
         </div>
-    </div>
+    </div></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script type="module">
-    // 1. IMPORTAR MÓDULOS DE FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-        getFirestore, collection, addDoc, doc, 
-        updateDoc, deleteDoc, onSnapshot 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // 2. CONFIGURACIÓN DE TU PROYECTO
-    const firebaseConfig = {
-        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
-        authDomain: "labmanager-b85b1.firebaseapp.com",
-        projectId: "labmanager-b85b1",
-        storageBucket: "labmanager-b85b1.firebasestorage.app",
-        messagingSenderId: "651630503448",
-        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
-    };
-
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+    const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const materialesRef = collection(db, "inventario");
 
-    // Variables de UI
-    const tabla = document.getElementById('tabla-body');
-    const modalWrap = new bootstrap.Modal(document.getElementById('modalMaterial'));
-
-    // 3. ESCUCHAR DATOS EN TIEMPO REAL (onSnapshot)
-    onSnapshot(materialesRef, (snapshot) => {
-        tabla.innerHTML = '';
-        snapshot.forEach((docSnap) => {
-            const item = docSnap.data();
-            const idDoc = docSnap.id;
-            
-            // Alerta visual de stock bajo
-            const stockBajo = parseInt(item.stock) <= parseInt(item.stockMinimo);
-            const badgeClass = stockBajo ? 'badge bg-danger' : 'badge bg-success';
-
-            tabla.innerHTML += `
-                <tr>
-                    <td class="ps-4 text-muted small">${item.codigo}</td>
-                    <td><strong>${item.nombre}</strong></td>
-                    <td><span class="${badgeClass}">${item.stock}</span></td>
-                    <td>${item.ubicacion || 'N/A'}</td>
-                    <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-primary me-1" 
-                            onclick="prepararEditar('${idDoc}', '${item.nombre}', '${item.codigo}', '${item.stock}', '${item.stockMinimo}', '${item.ubicacion}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarMaterial('${idDoc}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`;
+    onSnapshot(collection(db, "inventario"), (snap) => {
+        const tbody = document.getElementById('lista-inventario');
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+            const item = d.data();
+            tbody.innerHTML += `<tr>
+                <td class="ps-4 fw-bold">${item.nombre}</td>
+                <td><span class="badge bg-light text-dark border">${item.categoria}</span></td>
+                <td><span class="fw-bold ${item.stock < 5 ? 'text-danger' : ''}">${item.stock} unidades</span></td>
+                <td>${item.ubicacion || 'Lab Central'}</td>
+                <td class="text-end pe-4">
+                    <button class="btn btn-sm btn-outline-danger" onclick="window.eliminar('${d.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
         });
     });
 
-    // 4. FUNCIONES GLOBALES (Asignadas a window para que el HTML las vea)
-    
-    window.prepararCrear = () => {
-        document.getElementById('formMaterial').reset();
-        document.getElementById('edit-index').value = "-1";
-        document.getElementById('modalTitle').innerText = "Nuevo Material";
-        modalWrap.show();
+    window.guardarItem = async () => {
+        await addDoc(collection(db, "inventario"), {
+            nombre: document.getElementById('i-nombre').value,
+            stock: Number(document.getElementById('i-stock').value),
+            categoria: document.getElementById('i-cat').value
+        });
+        bootstrap.Modal.getInstance(document.getElementById('modalItem')).hide();
     };
 
-    window.prepararEditar = (id, nombre, codigo, stock, min, ubi) => {
-        document.getElementById('m-nombre').value = nombre;
-        document.getElementById('m-id').value = codigo;
-        document.getElementById('m-stock').value = stock;
-        document.getElementById('m-min').value = min;
-        document.getElementById('m-ubi').value = ubi;
-        document.getElementById('edit-index').value = id;
-        document.getElementById('modalTitle').innerText = "Editar Material";
-        modalWrap.show();
-    };
-
-    window.guardarMaterial = async () => {
-        const idFirebase = document.getElementById('edit-index').value;
-        const nuevoDato = {
-            nombre: document.getElementById('m-nombre').value,
-            codigo: document.getElementById('m-id').value,
-            stock: document.getElementById('m-stock').value,
-            stockMinimo: document.getElementById('m-min').value || 0,
-            ubicacion: document.getElementById('m-ubi').value
-        };
-
-        try {
-            if (idFirebase === "-1") {
-                await addDoc(materialesRef, nuevoDato);
-            } else {
-                const docRef = doc(db, "inventario", idFirebase);
-                await updateDoc(docRef, nuevoDato);
-            }
-            modalWrap.hide();
-        } catch (e) {
-            console.error(e);
-            alert("Error al conectar con Firebase. Revisa las reglas de seguridad.");
-        }
-    };
-
-    window.eliminarMaterial = async (id) => {
-        if(confirm("¿Seguro que deseas eliminar este material permanentemente?")) {
-            await deleteDoc(doc(db, "inventario", id));
-        }
-    };
-
+    window.eliminar = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "inventario", id)); };
 </script>
 </body>
 </html>

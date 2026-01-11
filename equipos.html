@@ -9,196 +9,58 @@
 </head>
 <body>
 <div class="d-flex">
-    <div id="sidebar-container" style="width: 250px; background: #2c3e50; min-height: 100vh;">
-        <div class="p-3 text-white">
-            <h4>LAB TRACK</h4>
-            <hr>
-            <nav class="nav flex-column">
-                <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i>Dashboard</a>
-                <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i>Inventario</a>
-                <a href="#" class="nav-link text-white active fw-bold"><i class="fas fa-flask me-2"></i>Equipos</a>
-            </nav>
-        </div>
+    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
+        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
+        <nav class="nav flex-column gap-2">
+            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i> Inventario</a>
+            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-flask me-2"></i> Equipos</a>
+            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
+            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
+            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+        </nav>
     </div>
 
     <div class="flex-grow-1 p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Gestión de Equipos</h2>
-            <button class="btn btn-primary" onclick="prepararCrearEquipo()">
+            <h2 class="fw-bold">Gestión de Equipos</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEq">
                 <i class="fas fa-plus me-2"></i>Registrar Equipo
             </button>
         </div>
-
-        <div class="content-card p-0 overflow-hidden bg-white shadow-sm rounded">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">ID de Equipo</th>
-                        <th>Nombre del Equipo</th>
-                        <th>Estado</th>
-                        <th>Última Calibración</th>
-                        <th>Responsable</th>
-                        <th class="text-end pe-4">Acciones</th>
-                    </tr>
+                    <tr><th class="ps-4">Equipo</th><th>Estado</th><th>Responsable</th><th class="text-end pe-4">Acciones</th></tr>
                 </thead>
-                <tbody id="lista-equipos">
-                    </tbody>
+                <tbody id="lista-equipos"></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalEquipo" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="equipoModalTitle">Registrar Nuevo Equipo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formEquipo">
-                    <input type="hidden" id="equipo-edit-id">
-                    <div class="mb-3">
-                        <label class="form-label">Nombre del Equipo</label>
-                        <input type="text" id="e-nombre" class="form-control" placeholder="Ej. Secuenciador ADN" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">ID / Código de Activo</label>
-                        <input type="text" id="e-id" class="form-control" placeholder="Ej. EQ-001" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Estado</label>
-                            <select id="e-estado" class="form-select">
-                                <option value="Operativo">Operativo</option>
-                                <option value="Mantenimiento">Mantenimiento</option>
-                                <option value="Fuera de Servicio">Fuera de Servicio</option>
-                                <option value="Alerta Temp">Alerta Temperatura</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Última Calibración</label>
-                            <input type="date" id="e-calibracion" class="form-control">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Responsable Académico</label>
-                        <input type="text" id="e-responsable" class="form-control">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary w-50" onclick="guardarEquipo()">Guardar Equipo</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-        getFirestore, collection, addDoc, doc, 
-        updateDoc, deleteDoc, onSnapshot 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
-        authDomain: "labmanager-b85b1.firebaseapp.com",
-        projectId: "labmanager-b85b1",
-        storageBucket: "labmanager-b85b1.firebasestorage.app",
-        messagingSenderId: "651630503448",
-        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
-    };
-
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+    const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const equiposRef = collection(db, "equipos");
 
-    const listaEquipos = document.getElementById('lista-equipos');
-    const modalEquipoWrap = new bootstrap.Modal(document.getElementById('modalEquipo'));
-
-    // --- ESCUCHAR EQUIPOS EN TIEMPO REAL ---
-    onSnapshot(equiposRef, (snapshot) => {
-        listaEquipos.innerHTML = '';
-        snapshot.forEach((docSnap) => {
-            const eq = docSnap.data();
-            const fireId = docSnap.id;
-
-            let color = 'secondary';
-            if (eq.estado === 'Operativo') color = 'success';
-            else if (eq.estado === 'Mantenimiento') color = 'warning';
-            else if (eq.estado === 'Fuera de Servicio' || eq.estado === 'Alerta Temp') color = 'danger';
-
-            listaEquipos.innerHTML += `
-                <tr>
-                    <td class="ps-4">${eq.codigoId}</td>
-                    <td class="fw-bold">${eq.nombre}</td>
-                    <td><span class="badge bg-${color}">${eq.estado}</span></td>
-                    <td>${eq.ultimaCalibracion || 'No registrada'}</td>
-                    <td>${eq.responsable || 'N/A'}</td>
-                    <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-outline-primary me-1" 
-                            onclick="prepararEditarEquipo('${fireId}', '${eq.nombre}', '${eq.codigoId}', '${eq.estado}', '${eq.ultimaCalibracion}', '${eq.responsable}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarEquipo('${fireId}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>`;
+    onSnapshot(collection(db, "equipos"), (snap) => {
+        const tbody = document.getElementById('lista-equipos');
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+            const eq = d.data();
+            const color = eq.estado === 'Operativo' ? 'success' : 'warning';
+            tbody.innerHTML += `<tr>
+                <td class="ps-4 fw-bold">${eq.nombre}</td>
+                <td><span class="badge bg-${color}">${eq.estado}</span></td>
+                <td>${eq.responsable}</td>
+                <td class="text-end pe-4"><button class="btn btn-sm btn-light"><i class="fas fa-edit"></i></button></td>
+            </tr>`;
         });
     });
-
-    // --- FUNCIONES GLOBALES ---
-
-    window.prepararCrearEquipo = () => {
-        document.getElementById('formEquipo').reset();
-        document.getElementById('equipo-edit-id').value = "-1";
-        document.getElementById('equipoModalTitle').innerText = "Registrar Nuevo Equipo";
-        modalEquipoWrap.show();
-    };
-
-    window.prepararEditarEquipo = (fireId, nombre, codigo, estado, calibracion, responsable) => {
-        document.getElementById('e-nombre').value = nombre;
-        document.getElementById('e-id').value = codigo;
-        document.getElementById('e-estado').value = estado;
-        document.getElementById('e-calibracion').value = calibracion;
-        document.getElementById('e-responsable').value = responsable;
-        document.getElementById('equipo-edit-id').value = fireId;
-        document.getElementById('equipoModalTitle').innerText = "Editar Equipo";
-        modalEquipoWrap.show();
-    };
-
-    window.guardarEquipo = async () => {
-        const fireId = document.getElementById('equipo-edit-id').value;
-        const eqData = {
-            nombre: document.getElementById('e-nombre').value,
-            codigoId: document.getElementById('e-id').value,
-            estado: document.getElementById('e-estado').value,
-            ultimaCalibracion: document.getElementById('e-calibracion').value,
-            responsable: document.getElementById('e-responsable').value
-        };
-
-        try {
-            if (fireId === "-1") {
-                await addDoc(equiposRef, eqData);
-            } else {
-                await updateDoc(doc(db, "equipos", fireId), eqData);
-            }
-            modalEquipoWrap.hide();
-        } catch (e) {
-            alert("Error al guardar en Firebase: " + e.message);
-        }
-    };
-
-    window.eliminarEquipo = async (fireId) => {
-        if(confirm("¿Seguro que deseas eliminar este equipo del sistema?")) {
-            await deleteDoc(doc(db, "equipos", fireId));
-        }
-    };
 </script>
 </body>
 </html>

@@ -8,59 +8,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <style>body { background-color: #f8f9fa; }</style>
 </head>
 <body>
 <div class="d-flex">
-    <div id="sidebar-container" style="width: 250px; background: #2c3e50; min-height: 100vh;">
-        <div class="p-3 text-white">
-            <h4>LAB TRACK</h4>
-            <hr>
-            <nav class="nav flex-column">
-                <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i>Dashboard</a>
-                <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i>Inventario</a>
-                <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i>Equipos</a>
-                <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i>Ejecuciones</a>
-                <a href="#" class="nav-link text-white active fw-bold"><i class="fas fa-chart-bar me-2"></i>Reportes</a>
-                <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i>Admin</a>
-            </nav>
-        </div>
+    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
+        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
+        <nav class="nav flex-column gap-2">
+            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i> Inventario</a>
+            <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i> Equipos</a>
+            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
+            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
+            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+        </nav>
     </div>
 
-    <div class="flex-grow-1 p-4" style="background-color: #f8f9fa;">
-        <h2 class="mb-4">Generación de Informes</h2>
+    <div class="flex-grow-1 p-4">
+        <h2 class="fw-bold mb-4">Generación de Informes</h2>
         
-        <div class="row">
+        <div class="row g-4">
             <div class="col-md-4">
-                <div class="content-card bg-white p-4 shadow-sm rounded">
-                    <h5>Configurar Reporte</h5>
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3">Configurar Reporte</h5>
+                    <p class="text-muted small">Selecciona la fuente de datos para extraer la información actual de Firestore.</p>
                     <hr>
                     <div class="mb-3">
-                        <label class="form-label">Tipo de Informe</label>
+                        <label class="form-label fw-bold">Tipo de Informe</label>
                         <select id="tipo-reporte" class="form-select">
-                            <option value="inventario">Inventario de Stock Actual</option>
+                            <option value="inventario">Inventario de Stock</option>
                             <option value="equipos">Estado de Equipos</option>
                             <option value="ejecuciones">Bitácora de Ejecuciones</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Formato de Salida</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="fmt" id="fmtPdf" checked>
-                            <label class="form-check-label" for="fmtPdf">Documento PDF (.pdf)</label>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Formato</label>
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-file-pdf text-danger me-2"></i> Documento PDF (.pdf)
                         </div>
                     </div>
-                    <button class="btn btn-primary w-100" id="btn-generar">
-                        <i class="fas fa-file-download me-2"></i>Generar e Imprimir
+                    <button class="btn btn-primary w-100 py-2 fw-bold" id="btn-generar">
+                        <i class="fas fa-download me-2"></i>Generar Informe
                     </button>
                 </div>
             </div>
 
             <div class="col-md-8">
-                <div class="content-card bg-white p-4 shadow-sm rounded h-100">
-                    <h5>Vista Previa y Registro</h5>
-                    <div id="preview-container" class="text-center py-5 border rounded bg-light">
-                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Los reportes generados se basan en los datos en tiempo real de tu base de datos Firebase.</p>
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 d-flex align-items-center justify-content-center text-center">
+                    <div id="status-container">
+                        <div class="icon-circle bg-light text-muted mb-3" style="font-size: 3rem;">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <h5 class="text-muted">Listo para procesar</h5>
+                        <p class="text-muted small">Haz clic en generar para descargar el archivo con los datos reales.</p>
                     </div>
                 </div>
             </div>
@@ -72,59 +72,50 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
-        authDomain: "labmanager-b85b1.firebaseapp.com",
-        projectId: "labmanager-b85b1",
-        storageBucket: "labmanager-b85b1.firebasestorage.app",
-        messagingSenderId: "651630503448",
-        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
+    const firebaseConfig = { 
+        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
+        authDomain: "labmanager-b85b1.firebaseapp.com", 
+        projectId: "labmanager-b85b1", 
+        storageBucket: "labmanager-b85b1.firebasestorage.app", 
+        messagingSenderId: "651630503448", 
+        appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const btnGenerar = document.getElementById('btn-generar');
-    const container = document.getElementById('preview-container');
+    const btn = document.getElementById('btn-generar');
+    const status = document.getElementById('status-container');
 
-    btnGenerar.addEventListener('click', async () => {
+    btn.addEventListener('click', async () => {
         const tipo = document.getElementById('tipo-reporte').value;
         
-        // Efecto visual de carga
-        container.innerHTML = `
+        status.innerHTML = `
             <div class="spinner-border text-primary mb-3" role="status"></div>
-            <p>Consultando base de datos Firebase...</p>
+            <p class="fw-bold">Extrayendo datos de Firebase...</p>
         `;
 
         try {
             const querySnapshot = await getDocs(collection(db, tipo));
             const data = [];
-            querySnapshot.forEach((doc) => {
-                data.push({ id: doc.id, ...doc.data() });
-            });
+            querySnapshot.forEach(doc => data.push(doc.data()));
 
             if (data.length === 0) {
-                container.innerHTML = `<div class="alert alert-warning">No hay datos suficientes para generar este reporte.</div>`;
+                status.innerHTML = `<i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i><p>No se encontraron datos en "${tipo}".</p>`;
                 return;
             }
 
             generarPDF(tipo, data);
 
-            container.innerHTML = `
-                <div class="alert alert-success mx-4">
-                    <i class="fas fa-check-circle me-2"></i> Reporte de <strong>${tipo}</strong> generado correctamente.
-                </div>
-                <div class="p-4 border mx-4 bg-white shadow-sm text-start">
-                    <h6>LAB TRACK - Reporte Generado</h6>
-                    <small class="text-muted">ID de Sesión: ${Math.random().toString(36).substr(2, 9)}</small>
-                    <hr>
-                    <p>Se han procesado <strong>${data.length}</strong> registros encontrados en Firestore.</p>
-                    <p class="small text-muted">El archivo se ha descargado automáticamente en tu navegador.</p>
+            status.innerHTML = `
+                <div class="alert alert-success border-0 shadow-sm p-4">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h5>¡Informe Generado!</h5>
+                    <p class="mb-0">Se han procesado ${data.length} registros exitosamente.</p>
                 </div>
             `;
-        } catch (error) {
-            console.error(error);
-            container.innerHTML = `<div class="alert alert-danger">Error al conectar con Firebase.</div>`;
+        } catch (e) {
+            status.innerHTML = `<i class="fas fa-times-circle text-danger fa-3x mb-3"></i><p>Error: ${e.message}</p>`;
         }
     });
 
@@ -132,37 +123,40 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // Encabezado
-        doc.setFontSize(18);
-        doc.text("LAB TRACK - SISTEMA DE GESTIÓN", 14, 20);
-        doc.setFontSize(12);
-        doc.text(`Reporte de: ${titulo.toUpperCase()}`, 14, 30);
-        doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 38);
+        // Estética del PDF
+        doc.setFontSize(20);
+        doc.setTextColor(44, 62, 80);
+        doc.text("LAB TRACK - REPORTES", 14, 22);
         
-        // Preparar datos según el tipo
-        let columns = [];
-        let rows = [];
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Documento: Reporte de ${titulo.toUpperCase()}`, 14, 30);
+        doc.text(`Fecha: ${new Date().toLocaleString()}`, 14, 35);
+        doc.line(14, 40, 196, 40);
+
+        let headers = [];
+        let body = [];
 
         if (titulo === 'inventario') {
-            columns = ["Nombre", "Stock", "Ubicación", "Mínimo"];
-            rows = lista.map(item => [item.nombre, item.stock, item.ubicacion || 'N/A', item.stockMinimo || '0']);
+            headers = [["Material", "Stock", "Categoría"]];
+            body = lista.map(i => [i.nombre, i.stock, i.categoria]);
         } else if (titulo === 'equipos') {
-            columns = ["Equipo", "Estado", "Responsable", "Calibración"];
-            rows = lista.map(item => [item.nombre, item.estado, item.responsable, item.ultimaCalibracion]);
+            headers = [["Equipo", "Estado", "Responsable"]];
+            body = lista.map(i => [i.nombre, i.estado, i.responsable]);
         } else {
-            columns = ["ID", "Protocolo", "Resultado", "Fecha"];
-            rows = lista.map(item => [item.id.substring(0,5), item.prueba, item.resultado, item.fecha]);
+            headers = [["Protocolo", "Resultado", "Técnico", "Fecha"]];
+            body = lista.map(i => [i.prueba, i.resultado, i.tecnico, i.fecha]);
         }
 
         doc.autoTable({
             startY: 45,
-            head: [columns],
-            body: rows,
-            theme: 'striped',
-            headStyles: { fillColor: [44, 62, 80] }
+            head: headers,
+            body: body,
+            headStyles: { fillColor: [44, 62, 80] },
+            theme: 'grid'
         });
 
-        doc.save(`Reporte_${titulo}_${Date.now()}.pdf`);
+        doc.save(`Reporte_LabTrack_${titulo}.pdf`);
     }
 </script>
 </body>
