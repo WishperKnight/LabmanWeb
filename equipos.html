@@ -1,66 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Lab Track - Equipos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            transition: 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background: #3498db !important;
+            font-weight: bold;
+        }
+    </style>
 </head>
+
 <body>
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
+    <div class="sidebar p-4 d-flex flex-column">
         <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
-        <nav class="nav flex-column gap-2">
-            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i> Inventario</a>
-            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-flask me-2"></i> Equipos</a>
-            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
-            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
-            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+        <nav class="nav flex-column gap-2 mb-auto">
+            <a href="dashboard.html" class="nav-link rounded p-2"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="inventario.html" class="nav-link rounded p-2"><i class="fas fa-box me-2"></i> Inventario</a>
+            <a href="equipos.html" class="nav-link active rounded p-2"><i class="fas fa-flask me-2"></i> Equipos</a>
+            <a href="ejecuciones.html" class="nav-link rounded p-2"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
+            <a href="reportes.html" class="nav-link rounded p-2"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
         </nav>
+        <hr>
+        <button id="btnLogout" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Cerrar
+            Sesión</button>
     </div>
 
-    <div class="flex-grow-1 p-4">
+    <div class="content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold">Gestión de Equipos</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEq">
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEquipo">
                 <i class="fas fa-plus me-2"></i>Registrar Equipo
             </button>
         </div>
+
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr><th class="ps-4">Equipo</th><th>Estado</th><th>Responsable</th><th class="text-end pe-4">Acciones</th></tr>
+                    <tr>
+                        <th class="ps-4">Nombre del Equipo</th>
+                        <th>Estado</th>
+                        <th>Responsable</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
                 </thead>
-                <tbody id="lista-equipos"></tbody>
+                <tbody id="tabla-equipos"></tbody>
             </table>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    
-    const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <div class="modal fade" id="modalEquipo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="fw-bold">Nuevo Equipo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nombre</label>
+                        <input type="text" id="eq-nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Estado Inicial</label>
+                        <select id="eq-estado" class="form-select">
+                            <option value="Operativo">Operativo</option>
+                            <option value="En Mantenimiento">En Mantenimiento</option>
+                            <option value="Fuera de Servicio">Fuera de Servicio</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Responsable</label>
+                        <input type="text" id="eq-responsable" class="form-control" placeholder="Nombre del técnico">
+                    </div>
+                    <button class="btn btn-primary w-100 py-2 fw-bold" id="btnGuardarEq">Guardar Equipo</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    onSnapshot(collection(db, "equipos"), (snap) => {
-        const tbody = document.getElementById('lista-equipos');
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-            const eq = d.data();
-            const color = eq.estado === 'Operativo' ? 'success' : 'warning';
-            tbody.innerHTML += `<tr>
-                <td class="ps-4 fw-bold">${eq.nombre}</td>
-                <td><span class="badge bg-${color}">${eq.estado}</span></td>
-                <td>${eq.responsable}</td>
-                <td class="text-end pe-4"><button class="btn btn-sm btn-light"><i class="fas fa-edit"></i></button></td>
-            </tr>`;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onSnapshot(collection(db, "equipos"), (snap) => {
+            const t = document.getElementById('tabla-equipos');
+            t.innerHTML = '';
+            snap.forEach(d => {
+                const eq = d.data();
+                const color = eq.estado === 'Operativo' ? 'success' : 'warning';
+                t.innerHTML += `
+                <tr>
+                    <td class="ps-4 fw-bold">${eq.nombre}</td>
+                    <td><span class="badge bg-${color}">${eq.estado}</span></td>
+                    <td>${eq.responsable || 'Sin asignar'}</td>
+                    <td class="text-end pe-4">
+                        <a href="detalles.html?id=${d.id}&col=equipos" class="btn btn-sm btn-outline-primary">Ver Detalles</a>
+                    </td>
+                </tr>`;
+            });
         });
-    });
-</script>
+
+        document.getElementById('btnGuardarEq').onclick = async () => {
+            await addDoc(collection(db, "equipos"), {
+                nombre: document.getElementById('eq-nombre').value,
+                estado: document.getElementById('eq-estado').value,
+                responsable: document.getElementById('eq-responsable').value
+            });
+            bootstrap.Modal.getInstance(document.getElementById('modalEquipo')).hide();
+        };
+
+        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => window.location.href = "index.html");
+    </script>
 </body>
+
 </html>

@@ -1,99 +1,93 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <title>Lab Track - Inventario</title>
+    <title>Inventario - Lab Track</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <style>body { background-color: #f8f9fa; }</style>
+    <style>
+        body {
+            background: #f8f9fa;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 40px;
+            width: 100%;
+        }
+    </style>
 </head>
+
 <body>
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
-        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
-        <nav class="nav flex-column gap-2">
-            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-box me-2"></i> Inventario</a>
-            <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i> Equipos</a>
-            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
-            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
-            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+    <div class="sidebar p-4 d-flex flex-column">
+        <h4 class="mb-4">LAB TRACK</h4>
+        <nav class="nav flex-column gap-2 mb-auto">
+            <a href="dashboard.html" class="nav-link text-white p-2">Dashboard</a>
+            <a href="inventario.html" class="nav-link text-white active bg-primary rounded p-2">Inventario</a>
+            <a href="equipos.html" class="nav-link text-white p-2">Equipos</a>
+            <a href="reportes.html" class="nav-link text-white p-2">Reportes</a>
+            <a href="admin.html" class="nav-link text-white p-2">Admin</a>
         </nav>
+        <button id="btnLogout" class="btn btn-outline-danger">Cerrar Sesión</button>
     </div>
 
-    <div class="flex-grow-1 p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">Control de Inventario</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalItem">
-                <i class="fas fa-plus me-2"></i>Nuevo Material
-            </button>
+    <div class="content">
+        <div class="d-flex justify-content-between mb-4">
+            <h2>Inventario</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#m">Nuevo</button>
         </div>
-
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">Material</th>
-                        <th>Categoría</th>
-                        <th>Stock</th>
-                        <th>Ubicación</th>
-                        <th class="text-end pe-4">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-inventario"></tbody>
+        <div class="card border-0 shadow-sm rounded-4">
+            <table class="table mb-0">
+                <tbody id="t"></tbody>
             </table>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="modalItem" tabindex="-1">
-    <div class="modal-dialog"><div class="modal-content">
-        <div class="modal-header border-0"><h5>Registrar Material</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body">
-            <input type="text" id="i-nombre" class="form-control mb-3" placeholder="Nombre">
-            <input type="number" id="i-stock" class="form-control mb-3" placeholder="Cantidad">
-            <select id="i-cat" class="form-select mb-3"><option>Reactivo</option><option>Consumible</option></select>
-            <button class="btn btn-primary w-100" onclick="guardarItem()">Guardar</button>
+    <div class="modal fade" id="m" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content p-4">
+                <input type="text" id="n" class="form-control mb-2" placeholder="Nombre">
+                <input type="number" id="s" class="form-control mb-2" placeholder="Stock">
+                <button class="btn btn-primary w-100" id="g">Guardar</button>
+            </div>
         </div>
-    </div></div>
-</div>
+    </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    
-    const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    onSnapshot(collection(db, "inventario"), (snap) => {
-        const tbody = document.getElementById('lista-inventario');
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-            const item = d.data();
-            tbody.innerHTML += `<tr>
-                <td class="ps-4 fw-bold">${item.nombre}</td>
-                <td><span class="badge bg-light text-dark border">${item.categoria}</span></td>
-                <td><span class="fw-bold ${item.stock < 5 ? 'text-danger' : ''}">${item.stock} unidades</span></td>
-                <td>${item.ubicacion || 'Lab Central'}</td>
-                <td class="text-end pe-4">
-                    <button class="btn btn-sm btn-outline-danger" onclick="window.eliminar('${d.id}')"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
+        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onSnapshot(collection(db, "inventario"), snap => {
+            const t = document.getElementById('t'); t.innerHTML = '';
+            snap.forEach(d => {
+                t.innerHTML += `<tr><td class="p-3 fw-bold">${d.data().nombre}</td><td>Stock: ${d.data().stock}</td><td class="text-end"><a href="detalles.html?id=${d.id}&col=inventario" class="btn btn-sm btn-light border">Detalles</a></td></tr>`;
+            });
         });
-    });
 
-    window.guardarItem = async () => {
-        await addDoc(collection(db, "inventario"), {
-            nombre: document.getElementById('i-nombre').value,
-            stock: Number(document.getElementById('i-stock').value),
-            categoria: document.getElementById('i-cat').value
-        });
-        bootstrap.Modal.getInstance(document.getElementById('modalItem')).hide();
-    };
+        document.getElementById('g').onclick = async () => {
+            await addDoc(collection(db, "inventario"), { nombre: document.getElementById('n').value, stock: Number(document.getElementById('s').value) });
+            location.reload();
+        };
 
-    window.eliminar = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "inventario", id)); };
-</script>
+        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => window.location.href = "index.html");
+    </script>
 </body>
+
 </html>

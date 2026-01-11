@@ -1,62 +1,124 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Lab Track - Ejecuciones</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 40px;
+            width: 100%;
+        }
+    </style>
 </head>
+
 <body>
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
-        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
-        <nav class="nav flex-column gap-2">
-            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i> Inventario</a>
-            <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i> Equipos</a>
-            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
-            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
-            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+    <div class="sidebar p-4 d-flex flex-column">
+        <h4 class="mb-4">LAB TRACK</h4>
+        <nav class="nav flex-column gap-2 mb-auto">
+            <a href="dashboard.html" class="nav-link text-white p-2">Dashboard</a>
+            <a href="inventario.html" class="nav-link text-white p-2">Inventario</a>
+            <a href="equipos.html" class="nav-link text-white p-2">Equipos</a>
+            <a href="ejecuciones.html" class="nav-link active bg-primary rounded p-2 text-white">Ejecuciones</a>
+            <a href="reportes.html" class="nav-link text-white p-2">Reportes</a>
         </nav>
+        <button id="btnLogout" class="btn btn-outline-danger">Cerrar Sesión</button>
     </div>
 
-    <div class="flex-grow-1 p-4">
-        <h2 class="fw-bold mb-4">Bitácora de Pruebas</h2>
+    <div class="content">
+        <div class="d-flex justify-content-between mb-4">
+            <h2 class="fw-bold text-dark">Bitácora de Pruebas</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEjecucion">Nueva
+                Ejecución</button>
+        </div>
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr><th class="ps-4">Protocolo</th><th>Fecha</th><th>Resultado</th><th>Técnico</th></tr>
+                    <tr>
+                        <th class="ps-4">Prueba/Protocolo</th>
+                        <th>Fecha</th>
+                        <th>Resultado</th>
+                        <th>Técnico</th>
+                    </tr>
                 </thead>
-                <tbody id="lista-ejecuciones"></tbody>
+                <tbody id="tabla-ejecuciones"></tbody>
             </table>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    
-    const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <div class="modal fade" id="modalEjecucion" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content p-4 rounded-4">
+                <h5 class="fw-bold mb-3">Registrar Ejecución</h5>
+                <input type="text" id="ej-prueba" class="form-control mb-2" placeholder="Nombre del protocolo">
+                <select id="ej-resultado" class="form-select mb-2">
+                    <option value="Exitoso">Exitoso</option>
+                    <option value="Fallido">Fallido</option>
+                    <option value="Inconcluso">Inconcluso</option>
+                </select>
+                <input type="text" id="ej-tecnico" class="form-control mb-3" placeholder="Técnico a cargo">
+                <button class="btn btn-primary w-100" id="btnGuardarEj">Guardar en Bitácora</button>
+            </div>
+        </div>
+    </div>
 
-    const q = query(collection(db, "ejecuciones"), orderBy("fechaISO", "desc"));
-    onSnapshot(q, (snap) => {
-        const tbody = document.getElementById('lista-ejecuciones');
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-            const ej = d.data();
-            const badge = ej.resultado === 'Exitoso' ? 'success' : 'info';
-            tbody.innerHTML += `<tr>
-                <td class="ps-4 fw-bold">${ej.prueba}</td>
-                <td>${ej.fecha}</td>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const q = query(collection(db, "ejecuciones"), orderBy("fechaISO", "desc"));
+        onSnapshot(q, (snap) => {
+            const t = document.getElementById('tabla-ejecuciones');
+            t.innerHTML = '';
+            snap.forEach(d => {
+                const ej = d.data();
+                const badge = ej.resultado === 'Exitoso' ? 'success' : 'danger';
+                t.innerHTML += `<tr>
+                <td class="ps-4 fw-bold text-primary">${ej.prueba}</td>
+                <td class="small">${ej.fecha}</td>
                 <td><span class="badge bg-${badge}">${ej.resultado}</span></td>
                 <td>${ej.tecnico}</td>
             </tr>`;
+            });
         });
-    });
-</script>
+
+        document.getElementById('btnGuardarEj').onclick = async () => {
+            const ahora = new Date();
+            await addDoc(collection(db, "ejecuciones"), {
+                prueba: document.getElementById('ej-prueba').value,
+                resultado: document.getElementById('ej-resultado').value,
+                tecnico: document.getElementById('ej-tecnico').value,
+                fecha: ahora.toLocaleString(),
+                fechaISO: ahora.toISOString() // Para ordenar correctamente
+            });
+            bootstrap.Modal.getInstance(document.getElementById('modalEjecucion')).hide();
+        };
+
+        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => window.location.href = "index.html");
+    </script>
 </body>
+
 </html>

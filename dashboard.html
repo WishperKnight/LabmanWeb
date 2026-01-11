@@ -1,191 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Track - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
-        /* Ocultamos el body inicialmente para evitar el "parpadeo" antes de verificar Auth */
-        body { display: none; background-color: #f8f9fa; }
-        .stat-card {
-            border: none;
-            border-radius: 15px;
-            transition: transform 0.3s;
-        }
-        .stat-card:hover { transform: translateY(-5px); }
-        .icon-shape {
-            width: 48px;
-            height: 48px;
+        body {
+            background: #f8f9fa;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-link.active {
+            color: white;
+            font-weight: bold;
+            background: #3498db;
         }
     </style>
 </head>
-<body>
 
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;">
-        <div class="p-4 text-white">
-            <h4 class="d-flex align-items-center">
-                <i class="fas fa-microscope me-2"></i> LAB TRACK
-            </h4>
-            <hr class="mb-4">
-            <nav class="nav flex-column gap-2">
-                <a href="#" class="nav-link text-white active fw-bold bg-primary rounded">
-                    <i class="fas fa-home me-2"></i> Dashboard
-                </a>
-                <a href="inventario.html" class="nav-link text-white p-2">
-                    <i class="fas fa-box me-2"></i> Inventario
-                </a>
-                <a href="equipos.html" class="nav-link text-white p-2">
-                    <i class="fas fa-flask me-2"></i> Equipos
-                </a>
-                <a href="ejecuciones.html" class="nav-link text-white p-2">
-                    <i class="fas fa-dna me-2"></i> Ejecuciones
-                </a>
-                <a href="reportes.html" class="nav-link text-white p-2">
-                    <i class="fas fa-chart-bar me-2"></i> Reportes
-                </a>
-                <a href="admin.html" class="nav-link text-white p-2">
-                    <i class="fas fa-users-cog me-2"></i> Admin
-                </a>
-            </nav>
-            <div class="mt-5 pt-5">
-                <button id="btnLogout" class="btn btn-outline-danger w-100">
-                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
-                </button>
-            </div>
-        </div>
+<body>
+    <div class="sidebar p-4 d-flex flex-column">
+        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
+        <nav class="nav flex-column gap-2 mb-auto">
+            <a href="dashboard.html" class="nav-link active rounded p-2"><i class="fas fa-home me-2"></i> Dashboard</a>
+            <a href="inventario.html" class="nav-link rounded p-2"><i class="fas fa-box me-2"></i> Inventario</a>
+            <a href="equipos.html" class="nav-link rounded p-2"><i class="fas fa-flask me-2"></i> Equipos</a>
+            <a href="reportes.html" class="nav-link rounded p-2"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
+            <a href="admin.html" class="nav-link rounded p-2"><i class="fas fa-users-cog me-2"></i> Admin</a>
+        </nav>
+        <button id="btnLogout" class="btn btn-outline-danger mt-4"><i class="fas fa-sign-out-alt me-2"></i> Cerrar
+            Sesión</button>
     </div>
 
-    <div class="flex-grow-1 p-4">
-        <header class="d-flex justify-content-between align-items-center mb-5">
-            <div>
-                <h2 class="fw-bold mb-0">Panel de Control</h2>
-                <p class="text-muted">Bienvenido de nuevo, <span id="userEmail" class="fw-bold text-primary">...</span></p>
-            </div>
-            <div class="text-end">
-                <span id="currentDate" class="badge bg-white text-dark border p-2"></span>
-            </div>
-        </header>
-
-        <div class="row g-4 mb-5">
-            <div class="col-md-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-light-primary text-primary me-3">
-                            <i class="fas fa-vials fa-lg"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-0 small uppercase fw-bold">Reactivos Bajos</p>
-                            <h3 class="fw-bold mb-0" id="stat-reactivos">12</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-light-warning text-warning me-3">
-                            <i class="fas fa-tools fa-lg"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-0 small uppercase fw-bold">En Mantenimiento</p>
-                            <h3 class="fw-bold mb-0" id="stat-mantenimiento">3</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-light-success text-success me-3">
-                            <i class="fas fa-check-double fa-lg"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-0 small uppercase fw-bold">Pruebas Exitosas</p>
-                            <h3 class="fw-bold mb-0" id="stat-pruebas">154</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stat-card shadow-sm p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-light-danger text-danger me-3">
-                            <i class="fas fa-exclamation-triangle fa-lg"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-0 small uppercase fw-bold">Alertas Temp.</p>
-                            <h3 class="fw-bold mb-0" id="stat-alertas">1</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card border-0 shadow-sm p-4 rounded-4 mb-4">
-                    <h5 class="fw-bold mb-4">Actividad Reciente del Laboratorio</h5>
-                    <div id="recentActivity" class="text-muted text-center py-5">
-                        <p><i class="fas fa-clock fa-2x mb-3"></i><br>Conectando con la bitácora de Firebase...</p>
-                    </div>
+    <div class="content">
+        <h2>Bienvenido al Laboratorio</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card p-4 shadow-sm border-0 rounded-4">
+                    <h5>Reactivos</h5>
+                    <h2 id="count-inv">0</h2>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm p-4 rounded-4 bg-primary text-white">
-                    <h5 class="fw-bold mb-3">Acceso Rápido</h5>
-                    <div class="d-grid gap-2">
-                        <a href="ejecuciones.html" class="btn btn-light btn-sm text-start"><i class="fas fa-plus me-2"></i>Nueva Ejecución</a>
-                        <a href="inventario.html" class="btn btn-light btn-sm text-start"><i class="fas fa-search me-2"></i>Buscar Reactivo</a>
-                        <a href="reportes.html" class="btn btn-light btn-sm text-start"><i class="fas fa-file-pdf me-2"></i>Generar Reporte Mensual</a>
-                    </div>
+                <div class="card p-4 shadow-sm border-0 rounded-4">
+                    <h5>Equipos</h5>
+                    <h2 id="count-eq">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 shadow-sm border-0 rounded-4">
+                    <h5>Usuarios</h5>
+                    <h2 id="count-user">0</h2>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
-        authDomain: "labmanager-b85b1.firebaseapp.com",
-        projectId: "labmanager-b85b1",
-        storageBucket: "labmanager-b85b1.firebasestorage.app",
-        messagingSenderId: "651630503448",
-        appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
-    };
+        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        onSnapshot(collection(db, "inventario"), s => document.getElementById('count-inv').textContent = s.size);
+        onSnapshot(collection(db, "equipos"), s => document.getElementById('count-eq').textContent = s.size);
+        onSnapshot(collection(db, "usuarios"), s => document.getElementById('count-user').textContent = s.size);
 
-    // --- PROTECCIÓN DE RUTA ---
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            document.getElementById('userEmail').textContent = user.email;
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            document.body.style.display = "block"; 
-        } else {
-            window.location.href = "index.html"; 
-        }
-    });
-
-    // --- CERRAR SESIÓN ---
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        signOut(auth).then(() => {
-            window.location.href = "index.html";
-        });
-    });
-</script>
-
+        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth).then(() => window.location.href = "index.html"));
+    </script>
 </body>
+
 </html>

@@ -1,176 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <title>Lab Track - Detalles</title>
+    <title>Detalles - Lab Track</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .detail-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        body {
+            background: #f8f9fa;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            min-height: 100vh;
             color: white;
-            border-radius: 15px;
-            padding: 30px;
+            position: fixed;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 40px;
+            width: 100%;
         }
     </style>
 </head>
+
 <body>
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
-        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
-        <nav class="nav flex-column gap-2">
-            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i> Inventario</a>
-            <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i> Equipos</a>
-            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
-            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
-            <a href="admin.html" class="nav-link text-white"><i class="fas fa-users-cog me-2"></i> Admin</a>
+    <div class="sidebar p-4 d-flex flex-column">
+        <h4 class="mb-4">LAB TRACK</h4>
+        <nav class="nav flex-column gap-2 mb-auto">
+            <a href="dashboard.html" class="nav-link text-white">Dashboard</a>
+            <a href="inventario.html" class="nav-link text-white">Inventario</a>
+            <a href="equipos.html" class="nav-link text-white">Equipos</a>
         </nav>
+        <button id="btnLogout" class="btn btn-outline-danger">Cerrar Sesión</button>
     </div>
 
-    <div class="flex-grow-1 p-4">
-        <div class="mb-4">
-            <a href="javascript:history.back()" class="text-decoration-none text-muted">
-                <i class="fas fa-arrow-left me-2"></i> Volver al listado
-            </a>
-        </div>
-
-        <div class="detail-header shadow-sm mb-4">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <span class="badge bg-primary mb-2" id="det-categoria">Categoría</span>
-                    <h1 class="fw-bold" id="det-nombre">Cargando nombre...</h1>
-                    <p class="mb-0 opacity-75"><i class="fas fa-tag me-2"></i> ID: <span id="det-id">---</span></p>
-                </div>
-                <div class="text-end">
-                    <p class="small mb-1">Estado de Stock / Operativo</p>
-                    <h2 class="fw-bold" id="det-estado-visual">---</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-8">
-                <div class="card border-0 shadow-sm rounded-4 p-4">
-                    <h5 class="fw-bold mb-4">Información General</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Nombre del Elemento</label>
-                            <input type="text" id="edit-nombre" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Ubicación en Laboratorio</label>
-                            <input type="text" id="edit-ubicacion" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Cantidad / Stock</label>
-                            <input type="number" id="edit-stock" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Responsable / Proveedor</label>
-                            <input type="text" id="edit-responsable" class="form-control">
-                        </div>
-                        <div class="col-12 mt-4">
-                            <button class="btn btn-primary px-4 py-2 fw-bold" onclick="actualizarDato()">
-                                <i class="fas fa-save me-2"></i>Guardar Cambios
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-light">
-                    <h6 class="fw-bold"><i class="fas fa-history me-2"></i>Última modificación</h6>
-                    <p class="small text-muted mb-0" id="det-fecha">Sincronizando...</p>
-                </div>
-                <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-danger border-4">
-                    <h6 class="fw-bold text-danger">Zona de Peligro</h6>
-                    <p class="small text-muted">La eliminación de este registro es permanente y no se puede deshacer.</p>
-                    <button class="btn btn-outline-danger btn-sm w-100" onclick="eliminarDato()">
-                        <i class="fas fa-trash-alt me-2"></i>Eliminar permanentemente
-                    </button>
-                </div>
+    <div class="content">
+        <div class="card p-4 shadow-sm rounded-4 border-0">
+            <h3 id="n_disp" class="fw-bold">Cargando...</h3>
+            <hr>
+            <div class="mb-3"><label class="form-label fw-bold">Nombre</label><input type="text" id="en"
+                    class="form-control"></div>
+            <div class="mb-3"><label class="form-label fw-bold">Valor (Stock/Estado)</label><input type="text" id="ev"
+                    class="form-control"></div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" id="btn_u">Actualizar</button>
+                <button class="btn btn-danger" id="btn_d">Eliminar</button>
             </div>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { 
-        apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
-        authDomain: "labmanager-b85b1.firebaseapp.com", 
-        projectId: "labmanager-b85b1", 
-        storageBucket: "labmanager-b85b1.firebasestorage.app", 
-        messagingSenderId: "651630503448", 
-        appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
-    };
+        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        const p = new URLSearchParams(window.location.search);
+        const id = p.get('id'); const col = p.get('col');
+        const dRef = doc(db, col, id);
 
-    // Obtener ID y Colección de la URL (ej: detalles.html?id=123&col=inventario)
-    const params = new URLSearchParams(window.location.search);
-    const docId = params.get('id');
-    const colName = params.get('col');
-
-    if (!docId || !colName) {
-        alert("Error: No se encontró el elemento.");
-        window.location.href = "dashboard.html";
-    }
-
-    const docRef = doc(db, colName, docId);
-
-    // Cargar datos al iniciar
-    async function cargarDetalles() {
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            // Llenar vista
-            document.getElementById('det-nombre').textContent = data.nombre;
-            document.getElementById('det-id').textContent = docId;
-            document.getElementById('det-categoria').textContent = data.categoria || colName.toUpperCase();
-            document.getElementById('det-estado-visual').textContent = data.stock || data.estado || "---";
-            document.getElementById('det-fecha').textContent = data.ultimaModificacion || "No registrada";
-
-            // Llenar inputs para editar
-            document.getElementById('edit-nombre').value = data.nombre || "";
-            document.getElementById('edit-ubicacion').value = data.ubicacion || "";
-            document.getElementById('edit-stock').value = data.stock || 0;
-            document.getElementById('edit-responsable').value = data.responsable || "";
+        async function load() {
+            const s = await getDoc(dRef);
+            if (s.exists()) {
+                document.getElementById('n_disp').textContent = s.data().nombre;
+                document.getElementById('en').value = s.data().nombre;
+                document.getElementById('ev').value = s.data().stock || s.data().estado;
+            }
         }
-    }
 
-    window.actualizarDato = async () => {
-        try {
-            await updateDoc(docRef, {
-                nombre: document.getElementById('edit-nombre').value,
-                ubicacion: document.getElementById('edit-ubicacion').value,
-                stock: Number(document.getElementById('edit-stock').value),
-                responsable: document.getElementById('edit-responsable').value,
-                ultimaModificacion: new Date().toLocaleString()
-            });
-            alert("¡Actualizado con éxito!");
-            location.reload();
-        } catch (e) {
-            alert("Error al actualizar: " + e.message);
-        }
-    };
+        document.getElementById('btn_u').onclick = async () => {
+            const upd = { nombre: document.getElementById('en').value };
+            if (col === 'inventario') upd.stock = Number(document.getElementById('ev').value);
+            else upd.estado = document.getElementById('ev').value;
+            await updateDoc(dRef, upd); alert("¡Actualizado!");
+        };
 
-    window.eliminarDato = async () => {
-        if (confirm("¿Seguro que quieres eliminar este registro?")) {
-            await deleteDoc(docRef);
-            window.location.href = colName + ".html";
-        }
-    };
+        document.getElementById('btn_d').onclick = async () => {
+            if (confirm("¿Seguro?")) { await deleteDoc(dRef); window.location.href = col + ".html"; }
+        };
 
-    cargarDetalles();
-</script>
+        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => window.location.href = "index.html");
+        load();
+    </script>
 </body>
+
 </html>
