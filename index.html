@@ -146,7 +146,7 @@
 
                 if (!querySnapshot.empty) {
                     rol = querySnapshot.docs[0].data().rol;
-                } else if (email === "admin@labman.org") {
+                } else if (email.trim().toLowerCase() === "admin@labman.org") {
                     // ACCESO MAESTRO para tu cuenta
                     rol = "Administrador";
                 } else {
