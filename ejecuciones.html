@@ -1,124 +1,191 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <title>Lab Track - Ejecuciones</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecuciones - Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            background: #f8f9fa;
-            display: flex;
-        }
-
-        .sidebar {
-            width: 280px;
-            background: #2c3e50;
-            min-height: 100vh;
-            color: white;
-            position: fixed;
-        }
-
-        .content {
-            margin-left: 280px;
-            padding: 40px;
-            width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="sidebar p-4 d-flex flex-column">
-        <h4 class="mb-4">LAB TRACK</h4>
-        <nav class="nav flex-column gap-2 mb-auto">
-            <a href="dashboard.html" class="nav-link text-white p-2">Dashboard</a>
-            <a href="inventario.html" class="nav-link text-white p-2">Inventario</a>
-            <a href="equipos.html" class="nav-link text-white p-2">Equipos</a>
-            <a href="ejecuciones.html" class="nav-link active bg-primary rounded p-2 text-white">Ejecuciones</a>
-            <a href="reportes.html" class="nav-link text-white p-2">Reportes</a>
-        </nav>
-        <button id="btnLogout" class="btn btn-outline-danger">Cerrar Sesión</button>
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Ejecución de Protocolos</h2>
+                <p class="text-muted small">Registro de pruebas vinculado a personal y equipos autorizados.</p>
+            </div>
+            <button class="btn btn-primary shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalEj">
+                <i class="fas fa-play me-2"></i>Nueva Ejecución
+            </button>
+        </div>
+
+        <div class="card-custom">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Protocolo</th>
+                            <th>Técnico (Usuario)</th>
+                            <th>Equipo</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-ej"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <div class="content">
-        <div class="d-flex justify-content-between mb-4">
-            <h2 class="fw-bold text-dark">Bitácora de Pruebas</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEjecucion">Nueva
-                Ejecución</button>
-        </div>
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">Prueba/Protocolo</th>
-                        <th>Fecha</th>
-                        <th>Resultado</th>
-                        <th>Técnico</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-ejecuciones"></tbody>
-            </table>
-        </div>
-    </div>
+    <div class="modal fade" id="modalEj" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+                <h5 class="fw-bold mb-4">Registrar Inicio de Protocolo</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Nombre del Protocolo</label>
+                        <input type="text" id="ejProtocolo" class="form-control" placeholder="Ej: PCR Tiempo Real">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-primary">Técnico Responsable</label>
+                        <select id="ejTecnico" class="form-select border-primary-subtle">
+                            <option value="">Cargando personal...</option>
+                        </select>
+                    </div>
 
-    <div class="modal fade" id="modalEjecucion" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content p-4 rounded-4">
-                <h5 class="fw-bold mb-3">Registrar Ejecución</h5>
-                <input type="text" id="ej-prueba" class="form-control mb-2" placeholder="Nombre del protocolo">
-                <select id="ej-resultado" class="form-select mb-2">
-                    <option value="Exitoso">Exitoso</option>
-                    <option value="Fallido">Fallido</option>
-                    <option value="Inconcluso">Inconcluso</option>
-                </select>
-                <input type="text" id="ej-tecnico" class="form-control mb-3" placeholder="Técnico a cargo">
-                <button class="btn btn-primary w-100" id="btnGuardarEj">Guardar en Bitácora</button>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Descripción / Pasos</label>
+                        <textarea id="ejDesc" class="form-control" rows="2" placeholder="Procedimiento..."></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Equipo Utilizado</label>
+                        <select id="ejEquipo" class="form-select">
+                            <option value="">Seleccionar equipo...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Estado Inicial</label>
+                        <select id="ejEstado" class="form-select">
+                            <option value="En Curso">En Curso</option>
+                            <option value="Pendiente">Pendiente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="button" class="btn btn-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary w-50 fw-bold" id="btnSaveEj">
+                        <i class="fas fa-check-circle me-2"></i>Iniciar Registro
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script type="module">
+        import { cargarSidebar } from './sidebar.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
+            authDomain: "labmanager-b85b1.firebaseapp.com", 
+            projectId: "labmanager-b85b1", 
+            storageBucket: "labmanager-b85b1.firebasestorage.app", 
+            messagingSenderId: "651630503448", 
+            appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const q = query(collection(db, "ejecuciones"), orderBy("fechaISO", "desc"));
-        onSnapshot(q, (snap) => {
-            const t = document.getElementById('tabla-ejecuciones');
-            t.innerHTML = '';
-            snap.forEach(d => {
+        cargarSidebar('ejecuciones');
+
+        // --- 1. CARGAR USUARIOS Y EQUIPOS ---
+        const cargarDatosDinamicos = async () => {
+            // Cargar Técnicos
+            const selectTec = document.getElementById('ejTecnico');
+            const snapUser = await getDocs(collection(db, "usuarios"));
+            selectTec.innerHTML = '<option value="">Seleccione Técnico...</option>';
+            snapUser.forEach(doc => {
+                const u = doc.data();
+                const nombre = u.nombre || u.email;
+                selectTec.innerHTML += `<option value="${nombre}">${nombre}</option>`;
+            });
+
+            // Cargar Equipos
+            const selectEq = document.getElementById('ejEquipo');
+            const snapEq = await getDocs(collection(db, "equipos"));
+            selectEq.innerHTML = '<option value="">Ninguno / Manual</option>';
+            snapEq.forEach(doc => {
+                selectEq.innerHTML += `<option value="${doc.data().nombre}">${doc.data().nombre}</option>`;
+            });
+        };
+        cargarDatosDinamicos();
+
+        // --- 2. MOSTRAR EJECUCIONES ---
+        onSnapshot(collection(db, "ejecuciones"), s => {
+            const l = document.getElementById('lista-ej');
+            if(!l) return;
+            l.innerHTML = '';
+            s.forEach(d => {
                 const ej = d.data();
-                const badge = ej.resultado === 'Exitoso' ? 'success' : 'danger';
-                t.innerHTML += `<tr>
-                <td class="ps-4 fw-bold text-primary">${ej.prueba}</td>
-                <td class="small">${ej.fecha}</td>
-                <td><span class="badge bg-${badge}">${ej.resultado}</span></td>
-                <td>${ej.tecnico}</td>
-            </tr>`;
+                l.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${ej.protocolo}</td>
+                        <td class="small"><i class="fas fa-user-circle me-1 text-muted"></i>${ej.tecnico}</td>
+                        <td><span class="badge bg-light text-dark border">${ej.equipo || 'N/A'}</span></td>
+                        <td><span class="badge bg-info text-dark">${ej.estado}</span></td>
+                        <td class="text-end">
+                            <a href="detalles.html?id=${d.id}&col=ejecuciones" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>`;
             });
         });
 
-        document.getElementById('btnGuardarEj').onclick = async () => {
-            const ahora = new Date();
-            await addDoc(collection(db, "ejecuciones"), {
-                prueba: document.getElementById('ej-prueba').value,
-                resultado: document.getElementById('ej-resultado').value,
-                tecnico: document.getElementById('ej-tecnico').value,
-                fecha: ahora.toLocaleString(),
-                fechaISO: ahora.toISOString() // Para ordenar correctamente
-            });
-            bootstrap.Modal.getInstance(document.getElementById('modalEjecucion')).hide();
-        };
+        // --- 3. GUARDAR ---
+        document.addEventListener('click', async (e) => {
+            if (e.target.id === 'btnSaveEj') {
+                const protocolo = document.getElementById('ejProtocolo').value;
+                const tecnico = document.getElementById('ejTecnico').value;
+                const equipo = document.getElementById('ejEquipo').value;
+                const desc = document.getElementById('ejDesc').value;
+                const estado = document.getElementById('ejEstado').value;
 
-        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => window.location.href = "index.html");
+                if (!protocolo || !tecnico) {
+                    alert("⚠️ Debe asignar un protocolo y un técnico registrado.");
+                    return;
+                }
+
+                try {
+                    await addDoc(collection(db, "ejecuciones"), {
+                        protocolo, tecnico, equipo, descripcion: desc, estado,
+                        fechaInicio: new Date().toISOString()
+                    });
+                    bootstrap.Modal.getInstance(document.getElementById('modalEj')).hide();
+                } catch (error) { console.error(error); }
+            }
+
+            if (e.target.closest('#btnLogout')) {
+                signOut(auth).then(() => window.location.href = "index.html");
+            }
+        });
     </script>
 </body>
-
 </html>

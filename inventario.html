@@ -1,93 +1,194 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario - Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            background: #f8f9fa;
-            display: flex;
-        }
-
-        .sidebar {
-            width: 280px;
-            background: #2c3e50;
-            min-height: 100vh;
-            color: white;
-            position: fixed;
-        }
-
-        .content {
-            margin-left: 280px;
-            padding: 40px;
-            width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="sidebar p-4 d-flex flex-column">
-        <h4 class="mb-4">LAB TRACK</h4>
-        <nav class="nav flex-column gap-2 mb-auto">
-            <a href="dashboard.html" class="nav-link text-white p-2">Dashboard</a>
-            <a href="inventario.html" class="nav-link text-white active bg-primary rounded p-2">Inventario</a>
-            <a href="equipos.html" class="nav-link text-white p-2">Equipos</a>
-            <a href="reportes.html" class="nav-link text-white p-2">Reportes</a>
-            <a href="admin.html" class="nav-link text-white p-2">Admin</a>
-        </nav>
-        <button id="btnLogout" class="btn btn-outline-danger">Cerrar Sesión</button>
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Gestión de Inventario</h2>
+                <p class="text-muted small">Control de materiales, reactivos y fungibles según el modelo E-R.</p>
+            </div>
+            <button class="btn btn-primary shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalInv">
+                <i class="fas fa-plus me-2"></i>Nuevo Material
+            </button>
+        </div>
+
+        <div class="card-custom">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Tipo</th>
+                            <th>Ubicación</th>
+                            <th>Stock / Capacidad</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-inv">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <div class="content">
-        <div class="d-flex justify-content-between mb-4">
-            <h2>Inventario</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#m">Nuevo</button>
-        </div>
-        <div class="card border-0 shadow-sm rounded-4">
-            <table class="table mb-0">
-                <tbody id="t"></tbody>
-            </table>
-        </div>
-    </div>
+    <div class="modal fade" id="modalInv" tabindex="-1" aria-labelledby="modalInvLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+                <h5 class="fw-bold mb-4" id="modalInvLabel">Registrar Nuevo Material</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Nombre del Material</label>
+                    <input type="text" id="invNombre" class="form-control" placeholder="Ej: Ácido Sulfúrico">
+                </div>
 
-    <div class="modal fade" id="m" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content p-4">
-                <input type="text" id="n" class="form-control mb-2" placeholder="Nombre">
-                <input type="number" id="s" class="form-control mb-2" placeholder="Stock">
-                <button class="btn btn-primary w-100" id="g">Guardar</button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Tipo de Material</label>
+                        <select id="invTipo" class="form-select">
+                            <option value="Reactivo">Reactivo</option>
+                            <option value="Fungible">Fungible</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Cantidad Actual</label>
+                        <input type="number" id="invStock" class="form-control" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Capacidad Total (ml / mg / ud)</label>
+                    <input type="number" id="invCapacidad" class="form-control" placeholder="Capacidad según empaque">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Ubicación (Almacén / Estante)</label>
+                    <input type="text" id="invUbicacion" class="form-control" placeholder="Ej: Pasillo B - Nevera 2">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary w-50 fw-bold" id="btnG">
+                        <i class="fas fa-save me-2"></i>Guardar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script type="module">
+        import { cargarSidebar } from './sidebar.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
+        // Configuración de Firebase
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
+            authDomain: "labmanager-b85b1.firebaseapp.com", 
+            projectId: "labmanager-b85b1", 
+            storageBucket: "labmanager-b85b1.firebasestorage.app", 
+            messagingSenderId: "651630503448", 
+            appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        onSnapshot(collection(db, "inventario"), snap => {
-            const t = document.getElementById('t'); t.innerHTML = '';
-            snap.forEach(d => {
-                t.innerHTML += `<tr><td class="p-3 fw-bold">${d.data().nombre}</td><td>Stock: ${d.data().stock}</td><td class="text-end"><a href="detalles.html?id=${d.id}&col=inventario" class="btn btn-sm btn-light border">Detalles</a></td></tr>`;
+        // Cargar Sidebar
+        cargarSidebar('inventario');
+
+        // Renderizado de tabla en tiempo real
+        onSnapshot(collection(db, "inventario"), s => {
+            const l = document.getElementById('lista-inv');
+            if(!l) return;
+            l.innerHTML = '';
+            s.forEach(d => {
+                const item = d.data();
+                l.innerHTML += `
+                    <tr>
+                        <td><span class="fw-bold">${item.nombre}</span></td>
+                        <td><span class="badge bg-light text-dark border">${item.tipo}</span></td>
+                        <td><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${item.ubicacion || 'No asignada'}</small></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="fw-bold me-2">${item.cantidadActual}</span>
+                                <span class="text-muted small">/ ${item.capacidadTotal || 'N/A'}</span>
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <a href="detalles.html?id=${d.id}&col=inventario" class="btn btn-sm btn-outline-primary rounded-pill">
+                                <i class="fas fa-edit me-1"></i> Gestionar
+                            </a>
+                        </td>
+                    </tr>`;
             });
         });
 
-        document.getElementById('g').onclick = async () => {
-            await addDoc(collection(db, "inventario"), { nombre: document.getElementById('n').value, stock: Number(document.getElementById('s').value) });
-            location.reload();
-        };
+        // Delegación de Eventos para Botones
+        document.addEventListener('click', async (e) => {
+            
+            // Lógica: Guardar Material
+            if (e.target.id === 'btnG') {
+                const nombre = document.getElementById('invNombre').value;
+                const stock = document.getElementById('invStock').value;
+                const tipo = document.getElementById('invTipo').value;
+                const capacidad = document.getElementById('invCapacidad').value;
+                const ubicacion = document.getElementById('invUbicacion').value;
 
-        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => window.location.href = "index.html");
+                if (!nombre || !stock) {
+                    alert("El nombre y la cantidad son obligatorios");
+                    return;
+                }
+
+                try {
+                    await addDoc(collection(db, "inventario"), {
+                        nombre: nombre,
+                        tipo: tipo,
+                        cantidadActual: Number(stock),
+                        capacidadTotal: Number(capacidad),
+                        ubicacion: ubicacion,
+                        fechaRegistro: new Date().toISOString()
+                    });
+
+                    // Cerrar Modal
+                    const modalEl = document.getElementById('modalInv');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) modalInstance.hide();
+
+                    // Limpiar campos
+                    document.getElementById('invNombre').value = '';
+                    document.getElementById('invStock').value = '';
+                    document.getElementById('invUbicacion').value = '';
+                    document.getElementById('invCapacidad').value = '';
+
+                } catch (error) {
+                    console.error("Error al guardar:", error);
+                }
+            }
+
+            // Lógica: Cerrar Sesión
+            if (e.target.closest('#btnLogout')) {
+                if(confirm("¿Seguro que desea salir?")) {
+                    signOut(auth).then(() => window.location.href = "index.html");
+                }
+            }
+        });
     </script>
 </body>
-
 </html>

@@ -2,58 +2,189 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Lab Track - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="d-flex">
-    <div id="sidebar-container" style="width: 280px; background: #2c3e50; min-height: 100vh;" class="p-4 text-white">
-        <h4 class="mb-4"><i class="fas fa-microscope me-2"></i> LAB TRACK</h4>
-        <nav class="nav flex-column gap-2">
-            <a href="dashboard.html" class="nav-link text-white"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="inventario.html" class="nav-link text-white"><i class="fas fa-box me-2"></i> Inventario</a>
-            <a href="equipos.html" class="nav-link text-white"><i class="fas fa-flask me-2"></i> Equipos</a>
-            <a href="ejecuciones.html" class="nav-link text-white"><i class="fas fa-dna me-2"></i> Ejecuciones</a>
-            <a href="reportes.html" class="nav-link text-white"><i class="fas fa-chart-bar me-2"></i> Reportes</a>
-            <a href="#" class="nav-link text-white active fw-bold bg-primary rounded"><i class="fas fa-users-cog me-2"></i> Admin</a>
-        </nav>
-    </div>
 
-    <div class="flex-grow-1 p-4">
-        <h2 class="fw-bold mb-4">Usuarios del Sistema</h2>
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <table class="table align-middle mb-0">
-                <thead class="table-light">
-                    <tr><th class="ps-4">Nombre</th><th>Rol</th><th>Correo</th></tr>
-                </thead>
-                <tbody id="lista-usuarios"></tbody>
-            </table>
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="container-fluid py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Gestión de Usuarios</h2>
+                    <p class="text-muted small">Filtra y administra el personal del laboratorio.</p>
+                </div>
+                <button class="btn btn-primary shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalUser">
+                    <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+                </button>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Buscar por nombre o email...">
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="btn-group shadow-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary active filter-btn" data-role="Todos">Todos</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-role="Técnico">Técnicos</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-role="Supervisor">Supervisores</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-role="Investigador">Investigadores</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom p-0 overflow-hidden shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Nombre / Registro</th>
+                                <th>Email Corporativo</th>
+                                <th>Rol</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-usuarios"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div class="modal fade" id="modalUser" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+                <h5 class="fw-bold mb-4">Registrar Nuevo Perfil</h5>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Nombre Completo</label>
+                    <input type="text" id="userName" class="form-control" placeholder="Ej: Maria del Mar Garcia">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Email</label>
+                    <input type="email" id="userEmail" class="form-control" placeholder="tecnico@laboratorio.org">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Rol Operativo</label>
+                    <select id="userRol" class="form-select">
+                        <option value="Técnico">Técnico</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Investigador">Investigador</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary w-50 fw-bold" id="btnSaveUser">Guardar Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", storageBucket: "labmanager-b85b1.firebasestorage.app", messagingSenderId: "651630503448", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <script type="module">
+        import { cargarSidebar } from './sidebar.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    onSnapshot(collection(db, "usuarios"), (snap) => {
-        const tbody = document.getElementById('lista-usuarios');
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-            const u = d.data();
-            tbody.innerHTML += `<tr>
-                <td class="ps-4 fw-bold">${u.nombre}</td>
-                <td><span class="badge bg-info">${u.rol}</span></td>
-                <td>${u.correo}</td>
-            </tr>`;
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
+            authDomain: "labmanager-b85b1.firebaseapp.com", 
+            projectId: "labmanager-b85b1", 
+            storageBucket: "labmanager-b85b1.firebasestorage.app", 
+            messagingSenderId: "651630503448", 
+            appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        cargarSidebar('admin');
+
+        let allUsers = [];
+        let currentFilter = 'Todos';
+
+        onSnapshot(collection(db, "usuarios"), (snapshot) => {
+            allUsers = [];
+            snapshot.forEach(d => allUsers.push({ id: d.id, ...d.data() }));
+            renderTable();
         });
-    });
-</script>
+
+        function renderTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const tabla = document.getElementById('lista-usuarios');
+            
+            // Aplicar Filtros
+            const filtered = allUsers.filter(u => {
+                const nombre = (u.nombre || "").toLowerCase();
+                const email = (u.email || u.correo || "").toLowerCase();
+                const matchesSearch = nombre.includes(searchTerm) || email.includes(searchTerm);
+                const matchesRole = currentFilter === 'Todos' || u.rol === currentFilter;
+                return matchesSearch && matchesRole;
+            });
+
+            // Ordenar por fecha
+            filtered.sort((a, b) => new Date(b.fechaRegistro || 0) - new Date(a.fechaRegistro || 0));
+
+            tabla.innerHTML = filtered.length ? '' : '<tr><td colspan="4" class="text-center py-4">No se encontraron resultados</td></tr>';
+            
+            filtered.forEach(u => {
+                const correo = u.email || u.correo || "N/A";
+                const fecha = u.fechaRegistro ? new Date(u.fechaRegistro).toLocaleDateString() : 'Manual';
+                
+                tabla.innerHTML += `
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">${u.nombre || 'Sin nombre'}</div>
+                            <div class="text-muted small">Registrado: ${fecha}</div>
+                        </td>
+                        <td class="text-primary">${correo}</td>
+                        <td><span class="badge ${u.rol === 'Administrador' ? 'bg-danger' : 'bg-primary-subtle text-primary border'} px-3">${u.rol || 'Técnico'}</span></td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="borrarUsuario('${u.id}')"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // Eventos de Búsqueda y Filtro
+        document.getElementById('searchInput').addEventListener('input', renderTable);
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = e.target.getAttribute('data-role');
+                renderTable();
+            });
+        });
+
+        document.getElementById('btnSaveUser').onclick = async () => {
+            const n = document.getElementById('userName').value;
+            const e = document.getElementById('userEmail').value;
+            const r = document.getElementById('userRol').value;
+            if(!n || !e) return alert("Faltan datos");
+            try {
+                await addDoc(collection(db, "usuarios"), {
+                    nombre: n, email: e, rol: r, fechaRegistro: new Date().toISOString()
+                });
+                bootstrap.Modal.getInstance(document.getElementById('modalUser')).hide();
+                document.getElementById('userName').value = '';
+                document.getElementById('userEmail').value = '';
+            } catch (err) { console.error(err); }
+        };
+
+        window.borrarUsuario = async (id) => {
+            if(confirm("¿Eliminar usuario?")) await deleteDoc(doc(db, "usuarios", id));
+        };
+    </script>
 </body>
 </html>

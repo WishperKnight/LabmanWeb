@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorios - Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Unidades de Laboratorio</h2>
+                <p class="text-muted small">Gestión de espacios vinculados a personal registrado.</p>
+            </div>
+            <button class="btn btn-primary shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalLab">
+                <i class="fas fa-door-open me-2"></i>Nueva Unidad
+            </button>
+        </div>
+
+        <div class="row g-4" id="lista-labs">
+            </div>
+    </div>
+
+    <div class="modal fade" id="modalLab" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+                <h5 class="fw-bold mb-4">Registrar Laboratorio</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Nombre del Laboratorio</label>
+                    <input type="text" id="labNombre" class="form-control" placeholder="Ej: Lab. Genética">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Ubicación / Campus</label>
+                    <input type="text" id="labUbicacion" class="form-control" placeholder="Ej: Edificio A, Nivel 1">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-primary">Responsable (Usuario Registrado)</label>
+                    <select id="labResponsable" class="form-select border-primary-subtle shadow-sm">
+                        <option value="">Cargando usuarios...</option>
+                    </select>
+                    <div class="form-text small">Solo se permite asignar usuarios de la base de datos.</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary w-50 fw-bold" id="btnSaveLab">
+                        <i class="fas fa-save me-2"></i>Crear Unidad
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        import { cargarSidebar } from './sidebar.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
+            authDomain: "labmanager-b85b1.firebaseapp.com", 
+            projectId: "labmanager-b85b1", 
+            storageBucket: "labmanager-b85b1.firebasestorage.app", 
+            messagingSenderId: "651630503448", 
+            appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        cargarSidebar('laboratorios');
+
+        // --- 1. CARGAR USUARIOS PARA EL SELECTOR ---
+        const cargarSelectUsuarios = async () => {
+            const select = document.getElementById('labResponsable');
+            try {
+                const querySnapshot = await getDocs(collection(db, "usuarios"));
+                select.innerHTML = '<option value="">Seleccione un responsable...</option>';
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const nombre = user.nombre || user.email;
+                    select.innerHTML += `<option value="${nombre}">${nombre}</option>`;
+                });
+            } catch (err) {
+                console.error("Error cargando usuarios:", err);
+                select.innerHTML = '<option value="">Error al cargar personal</option>';
+            }
+        };
+        cargarSelectUsuarios();
+
+        // --- 2. RENDERIZAR LABORATORIOS EN TIEMPO REAL ---
+        onSnapshot(collection(db, "laboratorios"), s => {
+            const l = document.getElementById('lista-labs');
+            if(!l) return;
+            l.innerHTML = '';
+            s.forEach(d => {
+                const lab = d.data();
+                l.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="card-custom h-100 p-4 border-top border-primary border-4 shadow-sm">
+                            <h5 class="fw-bold text-dark mb-1">${lab.nombre}</h5>
+                            <p class="text-muted small mb-3"><i class="fas fa-map-marker-alt me-2"></i>${lab.ubicacion}</p>
+                            <div class="mt-auto pt-3 border-top">
+                                <span class="small text-secondary fw-bold">Responsable:</span>
+                                <div class="small text-primary">${lab.responsable}</div>
+                            </div>
+                            <a href="detalles.html?id=${d.id}&col=laboratorios" class="btn btn-outline-primary btn-sm mt-3 w-100 rounded-pill">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>`;
+            });
+        });
+
+        // --- 3. ACCIONES DE BOTONES ---
+        document.addEventListener('click', async (e) => {
+            if (e.target.id === 'btnSaveLab') {
+                const nombre = document.getElementById('labNombre').value;
+                const ubicacion = document.getElementById('labUbicacion').value;
+                const responsable = document.getElementById('labResponsable').value;
+
+                if (!nombre || !ubicacion || !responsable) {
+                    alert("Todos los campos son obligatorios.");
+                    return;
+                }
+
+                try {
+                    await addDoc(collection(db, "laboratorios"), {
+                        nombre, ubicacion, responsable,
+                        fechaCreacion: new Date().toISOString()
+                    });
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalLab'));
+                    modal.hide();
+                    
+                    document.getElementById('labNombre').value = '';
+                    document.getElementById('labUbicacion').value = '';
+                    document.getElementById('labResponsable').value = '';
+                } catch (error) { console.error(error); }
+            }
+
+            if (e.target.closest('#btnLogout')) {
+                signOut(auth).then(() => window.location.href = "index.html");
+            }
+        });
+    </script>
+</body>
+</html>
