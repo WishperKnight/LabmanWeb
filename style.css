@@ -1,96 +1,107 @@
-/* --- VARIABLES GLOBALES --- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
 :root {
     --bg-body: #f8fafc;
     --sidebar-bg: #1e293b;
-    --primary: #3b82f6;
-    --primary-hover: #2563eb;
-    --text-main: #334155;
-    --text-muted: #64748b;
+    --primary: #4f46e5;
+    --success: #10b981;
+    --danger: #ef4444;
+    --text-main: #1e293b;
     --white: #ffffff;
-    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radius: 16px;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* --- LAYOUT CORREGIDO --- */
+body {
+    background-color: var(--bg-body);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+}
+
+/* --- SIDEBAR FIJA --- */
 #sidebar-container {
-    width: 280px;
+    width: 260px;
     position: fixed;
-    top: 0;           /* Forzar a que empiece arriba del todo */
-    left: 0;          /* Forzar a que empiece a la izquierda */
+    top: 0;
+    left: 0;
     height: 100vh;
-    z-index: 1100;
-    background: var(--sidebar-bg); /* Evita transparencias que muestren contenido debajo */
-    transition: transform 0.3s ease;
+    z-index: 1000;
+    background: var(--sidebar-bg);
 }
 
+/* --- CONTENIDO PRINCIPAL --- */
 .main {
-    margin-left: 280px; /* Desplazamiento lateral exacto al ancho de la sidebar */
-    margin-top: 0;      /* Evita que se desplace hacia abajo */
-    padding: 2rem;
+    margin-left: 260px; /* Alineación perfecta al lado de la sidebar */
+    padding: 2.5rem;
     min-height: 100vh;
-    width: calc(100% - 280px); /* Asegura que el contenido ocupe el resto de la pantalla */
-    transition: all 0.3s ease;
 }
 
-/* --- AJUSTE RESPONSIVO PARA MÓVILES --- */
-@media (max-width: 992px) {
-    #sidebar-container {
-        transform: translateX(-100%);
-    }
-    
-    #sidebar-container.active {
-        transform: translateX(0);
-    }
-
-    .main {
-        margin-left: 0;  /* En móvil el contenido ocupa todo el ancho */
-        width: 100%;
-        padding: 1rem;
-    }
-
-    .mobile-header {
-        display: flex; /* Mostrar barra superior solo en móvil */
-        width: 100%;
-    }
-}
-
-/* --- COMPONENTES --- */
+/* --- TARJETAS MODERNAS --- */
 .card-custom {
     background: var(--white);
-    border-radius: 16px;
+    border-radius: var(--radius);
     border: none;
     box-shadow: var(--shadow);
     padding: 1.5rem;
-    height: 100%;
+    transition: transform 0.2s;
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card {
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
 }
 
 .scroll-section {
     max-height: 500px;
     overflow-y: auto;
-    padding-right: 5px;
 }
 
 /* --- RESPONSIVIDAD --- */
 @media (max-width: 992px) {
-    #sidebar-container {
-        transform: translateX(-100%);
-    }
-    
-    #sidebar-container.active {
-        transform: translateX(0);
-    }
+    #sidebar-container { transform: translateX(-100%); }
+    #sidebar-container.active { transform: translateX(0); }
+    .main { margin-left: 0; padding: 1.5rem; }
+    .mobile-header { display: flex !important; }
+}
+/* --- COLORES DE TEXTO EN SIDEBAR --- */
 
-    .main {
-        margin-left: 0;
-        padding: 1rem;
-    }
-
-    .mobile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+/* Enlace inactivo: Gris azulado claro */
+.inactive-link {
+    color: #94a3b8 !important; /* Color gris suave */
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
 
-@media (max-width: 576px) {
-    .card-custom { padding: 1rem; }
+.inactive-link:hover {
+    color: #ffffff !important; /* Pasa a blanco al poner el ratón */
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Enlace activo: Blanco puro con fondo destacado */
+.active-link {
+    color: #ffffff !important;
+    background-color: #4f46e5 !important; /* Fondo Indigo */
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    text-decoration: none;
+}
+
+.active-link i {
+    color: #ffffff !important;
+}
+
+/* Estilo general para los iconos de la sidebar */
+.nav-link i {
+    font-size: 1.1rem;
+    width: 20px;
 }

@@ -3,109 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Lab Track</title>
+    <title>Dashboard | Lab Track</title>
+    
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/707/707675.png">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="mobile-header d-lg-none">
-        <span class="fw-bold"><i class="fas fa-flask me-2"></i>LAB TRACK</span>
-        <button class="btn text-white" id="btnToggleSidebar">
-            <i class="fas fa-bars fa-lg"></i>
-        </button>
+    <div class="mobile-header d-none justify-content-between align-items-center bg-dark text-white p-3 shadow-sm">
+        <span class="fw-bold">LAB TRACK</span>
+        <button class="btn text-white" id="btnToggleSidebar"><i class="fas fa-bars fa-lg"></i></button>
     </div>
 
     <div id="sidebar-container"></div>
 
     <div class="main">
         <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold mb-0">Panel de Control</h2>
-            </div>
+            <header class="mb-5">
+                <h2 class="fw-bold text-dark">Panel de Control</h2>
+                <p class="text-muted">Estado actual de las operaciones en tiempo real.</p>
+            </header>
 
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-xl-3">
-                    <div class="card-custom bg-primary text-white">
-                        <small class="text-uppercase fw-bold opacity-75">Laboratorios</small>
+            <div class="row g-4 mb-5">
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom stat-card bg-primary">
+                        <i class="fas fa-hospital stat-icon"></i>
+                        <small class="fw-bold opacity-75">SEDES</small>
                         <h2 id="count-labs" class="fw-bold mb-0">0</h2>
                     </div>
                 </div>
-                <div class="col-6 col-xl-3">
-                    <div class="card-custom bg-success text-white">
-                        <small class="text-uppercase fw-bold opacity-75">Ejecuciones</small>
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom stat-card bg-success">
+                        <i class="fas fa-microscope stat-icon"></i>
+                        <small class="fw-bold opacity-75">PROCESOS</small>
                         <h2 id="count-ejecuciones" class="fw-bold mb-0">0</h2>
                     </div>
                 </div>
-                <div class="col-6 col-xl-3">
-                    <div class="card-custom bg-danger text-white">
-                        <small class="text-uppercase fw-bold opacity-75">Incidencias</small>
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom stat-card bg-danger">
+                        <i class="fas fa-exclamation-triangle stat-icon"></i>
+                        <small class="fw-bold opacity-75">ALERTAS</small>
                         <h2 id="count-incidencias" class="fw-bold mb-0">0</h2>
                     </div>
                 </div>
-                <div class="col-6 col-xl-3">
-                    <div class="card-custom bg-dark text-white">
-                        <small class="text-uppercase fw-bold opacity-75">Personal</small>
+                <div class="col-6 col-lg-3">
+                    <div class="card-custom stat-card bg-dark">
+                        <i class="fas fa-user-md stat-icon"></i>
+                        <small class="fw-bold opacity-75">PERSONAL</small>
                         <h2 id="count-users" class="fw-bold mb-0">0</h2>
                     </div>
                 </div>
             </div>
 
             <div class="row g-4">
-                <div class="col-12 col-lg-4">
-                    <div class="card-custom p-0 overflow-hidden">
-                        <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold text-success"><i class="fas fa-play-circle me-2"></i>En Curso</h6>
-                        </div>
-                        <div id="contenedor-ejecuciones" class="p-3 scroll-section">
-                            <div class="text-center py-4 text-muted small">Cargando procesos...</div>
-                        </div>
+                <div class="col-lg-7">
+                    <div class="card-custom h-100">
+                        <h6 class="fw-bold mb-4 text-uppercase small text-muted">Ejecuciones en curso</h6>
+                        <div id="contenedor-ejecuciones" class="scroll-section px-2"></div>
                     </div>
                 </div>
-
-                <div class="col-12 col-lg-5">
-                    <div class="card-custom p-0 overflow-hidden">
-                        <div class="p-3 border-bottom bg-white">
-                            <h6 class="mb-0 fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Alertas Recientes</h6>
-                        </div>
-                        <div id="contenedor-incidencias" class="p-3 scroll-section">
-                            <div class="text-center py-4 text-muted small">Cargando reportes...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-lg-3">
-                    <div class="card-custom p-0 overflow-hidden">
-                        <div class="p-3 border-bottom bg-white">
-                            <h6 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i>Laboratorios</h6>
-                        </div>
-                        <ul id="lista-labs-dashboard" class="list-group list-group-flush small"></ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalSeguimiento" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg">
-                <div class="modal-header bg-success text-white border-0">
-                    <h5 class="fw-bold mb-0">Detalle de Ejecución</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 text-dark">
-                    <div class="mb-3">
-                        <label class="text-muted small fw-bold text-uppercase d-block">Técnico Responsable</label>
-                        <h5 id="detTecnico" class="fw-bold text-primary"></h5>
-                    </div>
-                    <div class="mb-3">
-                        <label class="text-muted small fw-bold text-uppercase d-block">Protocolo / Proceso</label>
-                        <p id="detProtocolo" class="fw-bold"></p>
-                    </div>
-                    <div class="p-3 bg-light rounded">
-                        <label class="text-muted small fw-bold text-uppercase d-block">Equipo utilizado</label>
-                        <p id="detEquipo" class="mb-0"></p>
+                <div class="col-lg-5">
+                    <div class="card-custom h-100">
+                        <h6 class="fw-bold mb-4 text-uppercase small text-muted">Registro de Incidencias</h6>
+                        <div id="contenedor-incidencias" class="scroll-section px-2"></div>
                     </div>
                 </div>
             </div>
@@ -119,6 +82,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Inicializar Sidebar
+        cargarSidebar('dashboard');
+
+        // Toggle Sidebar Móvil
+        const btnToggle = document.getElementById('btnToggleSidebar');
+        if(btnToggle) {
+            btnToggle.onclick = () => document.getElementById('sidebar-container').classList.toggle('active');
+        }
+
+        // Firebase Config
         const firebaseConfig = { 
             apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
             authDomain: "labmanager-b85b1.firebaseapp.com", 
@@ -130,76 +103,50 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        cargarSidebar('dashboard');
 
-        // Toggle Sidebar Móvil
-        const btnToggle = document.getElementById('btnToggleSidebar');
-        const sidebar = document.getElementById('sidebar-container');
-        btnToggle.onclick = () => sidebar.classList.toggle('active');
+        // --- CARGA DE DATOS (Campos exactos de tu imagen) ---
 
-        // Función Modal
-        window.verSeguimiento = (protocolo, tecnico, equipo) => {
-            document.getElementById('detProtocolo').innerText = protocolo;
-            document.getElementById('detTecnico').innerText = tecnico;
-            document.getElementById('detEquipo').innerText = equipo;
-            new bootstrap.Modal(document.getElementById('modalSeguimiento')).show();
-        };
-
-        // 1. EJECUCIONES (Mapeo: protocolo, tecnico, equipo)
-        onSnapshot(collection(db, "ejecuciones"), (snapshot) => {
-            const container = document.getElementById('contenedor-ejecuciones');
-            document.getElementById('count-ejecuciones').innerText = snapshot.size;
-            container.innerHTML = "";
-            snapshot.forEach(doc => {
+        // Ejecuciones
+        onSnapshot(collection(db, "ejecuciones"), (snap) => {
+            document.getElementById('count-ejecuciones').innerText = snap.size;
+            const cont = document.getElementById('contenedor-ejecuciones');
+            cont.innerHTML = "";
+            snap.forEach(doc => {
                 const e = doc.data();
-                const params = `'${e.protocolo}', '${e.tecnico}', '${e.equipo}'`;
-                container.innerHTML += `
-                    <div class="card p-3 mb-2 border-0 bg-light shadow-sm" style="cursor:pointer" onclick="verSeguimiento(${params})">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="small text-dark text-truncate">${e.protocolo}</strong>
-                            <div class="spinner-grow spinner-grow-sm text-success"></div>
+                cont.innerHTML += `
+                    <div class="p-3 mb-3 border rounded-4 bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">${e.protocolo}</h6>
+                            <small class="text-primary fw-bold"><i class="fas fa-user-circle me-1"></i>${e.tecnico}</small>
                         </div>
-                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
-                            <small class="text-primary fw-bold"><i class="fas fa-user-md me-1"></i>${e.tecnico}</small>
-                            <span class="badge bg-white text-success border border-success" style="font-size:0.6rem;">${e.estado}</span>
-                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success px-3 rounded-pill">${e.estado}</span>
                     </div>`;
             });
         });
 
-        // 2. INCIDENCIAS (Mapeo: Descripcion, FechaDeRegistro, Momento, laboratorio)
-        onSnapshot(collection(db, "incidencias"), (snapshot) => {
-            const container = document.getElementById('contenedor-incidencias');
-            document.getElementById('count-incidencias').innerText = snapshot.size;
-            container.innerHTML = "";
-            snapshot.forEach(doc => {
+        // Incidencias
+        onSnapshot(collection(db, "incidencias"), (snap) => {
+            document.getElementById('count-incidencias').innerText = snap.size;
+            const cont = document.getElementById('contenedor-incidencias');
+            cont.innerHTML = "";
+            snap.forEach(doc => {
                 const i = doc.data();
-                container.innerHTML += `
-                    <div class="p-3 mb-3 bg-white border-start border-danger border-4 rounded shadow-sm">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="fw-bold text-danger small">${i.laboratorio}</span>
-                            <small class="text-muted" style="font-size:0.65rem;">${i.FechaDeRegistro}</small>
+                cont.innerHTML += `
+                    <div class="p-3 mb-3 border-start border-danger border-4 bg-white rounded-end shadow-sm">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-danger text-white mb-2">${i.laboratorio}</span>
+                            <small class="text-muted">${i.FechaDeRegistro.substring(0,10)}</small>
                         </div>
-                        <p class="small mb-1 fw-bold text-dark">${i.Momento}</p>
-                        <p class="small mb-0 text-muted">${i.Descripcion}</p>
+                        <p class="fw-bold mb-1 small text-dark">${i.Momento}</p>
+                        <p class="small text-muted mb-0">${i.Descripcion}</p>
                     </div>`;
             });
         });
 
-        // 3. LABORATORIOS Y PERSONAL
-        onSnapshot(collection(db, "laboratorios"), (snapshot) => {
-            document.getElementById('count-labs').innerText = snapshot.size;
-            const list = document.getElementById('lista-labs-dashboard');
-            list.innerHTML = "";
-            snapshot.forEach(doc => {
-                list.innerHTML += `<li class="list-group-item d-flex justify-content-between py-2 border-0">
-                    ${doc.data().nombre} <i class="fas fa-check-circle text-success small"></i></li>`;
-            });
-        });
+        // Labs y Usuarios
+        onSnapshot(collection(db, "laboratorios"), (s) => document.getElementById('count-labs').innerText = s.size);
+        onSnapshot(collection(db, "usuarios"), (s) => document.getElementById('count-users').innerText = s.size);
 
-        onSnapshot(collection(db, "usuarios"), (snapshot) => {
-            document.getElementById('count-users').innerText = snapshot.size;
-        });
     </script>
 </body>
 </html>
