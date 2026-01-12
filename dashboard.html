@@ -97,7 +97,7 @@
     <script type="module">
         import { cargarSidebar } from './sidebar.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         cargarSidebar('dashboard');
 
@@ -111,7 +111,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Ejecuciones con Barra de Progreso
+        // --- EJECUCIONES ---
         onSnapshot(collection(db, "ejecuciones"), (snap) => {
             document.getElementById('count-ejecuciones').innerText = snap.size;
             const cont = document.getElementById('contenedor-ejecuciones');
@@ -132,23 +132,46 @@
             });
         });
 
-        // Incidencias
+        // --- INCIDENCIAS CON GESTIÓN ---
         onSnapshot(collection(db, "incidencias"), (snap) => {
-            document.getElementById('count-incidencias').innerText = snap.size;
             const cont = document.getElementById('contenedor-incidencias');
             cont.innerHTML = "";
-            snap.forEach(doc => {
-                const i = doc.data();
+            let activos = 0;
+
+            snap.forEach(docSnap => {
+                const i = docSnap.data();
+                if (i.estado === 'cerrado') return; // Filtro para no mostrar cerradas
+                
+                activos++;
                 cont.innerHTML += `
-                    <div class="p-3 mb-2 border-start border-danger border-4 bg-light rounded-end">
-                        <div class="d-flex justify-content-between"><span class="fw-bold small text-danger">${i.laboratorio}</span><small class="text-muted">${i.FechaDeRegistro.substring(0,10)}</small></div>
-                        <p class="small mb-0 text-dark fw-bold">${i.Momento}</p>
-                        <p class="small text-muted mb-0 lh-sm">${i.Descripcion}</p>
+                    <div class="p-3 mb-2 border-start border-danger border-4 bg-light rounded-end d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold small text-danger">${i.laboratorio}</span>
+                                <small class="text-muted ms-3">${i.FechaDeRegistro ? i.FechaDeRegistro.substring(0,10) : 'Hoy'}</small>
+                            </div>
+                            <p class="small mb-0 text-dark fw-bold">${i.Momento || 'Alerta'}</p>
+                            <p class="small text-muted mb-0 lh-sm">${i.Descripcion}</p>
+                        </div>
+                        <button onclick="gestionarIncidencia('${docSnap.id}')" class="btn btn-sm btn-white border shadow-sm rounded-circle text-success ms-2">
+                            <i class="fas fa-check"></i>
+                        </button>
                     </div>`;
             });
+            document.getElementById('count-incidencias').innerText = activos;
+            if (activos === 0) cont.innerHTML = '<div class="text-center py-4 text-muted small">Sin alertas pendientes.</div>';
         });
 
-        // Tabla de Laboratorios
+        // Función Global para Cerrar Incidencia
+        window.gestionarIncidencia = async (id) => {
+            if (confirm("¿Marcar esta incidencia como resuelta?")) {
+                try {
+                    await updateDoc(doc(db, "incidencias", id), { estado: "cerrado" });
+                } catch (e) { alert("Error al actualizar"); }
+            }
+        };
+
+        // --- LABORATORIOS ---
         onSnapshot(collection(db, "laboratorios"), (snap) => {
             document.getElementById('count-labs').innerText = snap.size;
             const cont = document.getElementById('tabla-laboratorios-body');
@@ -157,7 +180,7 @@
                 const l = doc.data();
                 cont.innerHTML += `
                     <tr>
-                        <td><div class="fw-bold text-dark">${l.nombre || 'Sede Principal'}</div></td>
+                        <td><div class="fw-bold text-dark">${l.nombre || 'Sede'}</div></td>
                         <td><span class="text-muted small">${l.ubicacion || 'N/A'}</span></td>
                         <td><span class="badge bg-light text-dark border">${l.capacidad || '0'} equipos</span></td>
                         <td class="text-end"><span class="badge bg-success-subtle text-success">Activo</span></td>

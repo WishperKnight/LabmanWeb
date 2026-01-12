@@ -1,190 +1,196 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes - Lab Track</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    <title>Historial de Reportes | Lab Track</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
     <div id="sidebar-container"></div>
 
     <div class="main">
-        <div class="container-fluid py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="container-fluid">
+            <header class="d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h2 class="fw-bold mb-0">Gestión de Incidencias</h2>
-                    <p class="text-muted small">Registro vinculado a laboratorios y personal activo.</p>
+                    <h2 class="fw-bold text-dark m-0">Historial de Reportes</h2>
+                    <p class="text-muted small m-0">Gestión avanzada de incidencias.</p>
                 </div>
-                <button class="btn btn-danger shadow-sm px-4 fw-bold" data-bs-toggle="modal"
-                    data-bs-target="#modalIncidencia">
-                    <i class="fas fa-plus-circle me-2"></i>Nueva Incidencia
-                </button>
-            </div>
+                <div class="d-flex gap-3 align-items-center">
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onclick="abrirModalCrear()">
+                        <i class="fas fa-plus me-2"></i>Nuevo Reporte
+                    </button>
+                    
+                    <div class="btn-group bg-white shadow-sm p-1 rounded-pill border">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="cambiarFiltro('todos', this)">Todos</button>
+                        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="cambiarFiltro('abierto', this)">Abiertos</button>
+                    </div>
+                </div>
+            </header>
 
-            <div class="card-custom p-0 overflow-hidden shadow-sm">
+            <div class="card-premium border-0 shadow-sm">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light text-uppercase small fw-bold">
+                    <table class="table align-middle">
+                        <thead class="text-muted small fw-bold text-uppercase">
                             <tr>
-                                <th class="ps-4 py-3">Laboratorio</th>
-                                <th>Momento / Descripción</th>
-                                <th>Reportado por</th>
-                                <th class="text-end pe-4">Fecha Registro</th>
+                                <th class="ps-4">Incidencia</th>
+                                <th>Laboratorio</th>
+                                <th>Técnico</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="incidencias-body"></tbody>
+                        <tbody id="lista-reportes"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modalIncidencia" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg p-3">
-                <div class="modal-header border-0">
-                    <h5 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Registrar Incidencia
-                    </h5>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="fw-bold m-0" id="modalTitulo">Nuevo Reporte</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Laboratorio</label>
-                        <select id="incLaboratorio" class="form-select">
-                            <option value="" selected disabled>Cargando laboratorios...</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Usuario que Reporta</label>
-                        <select id="incUsuario" class="form-select">
-                            <option value="" selected disabled>Cargando personal...</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Momento</label>
-                        <input type="text" id="incMomento" class="form-control"
-                            placeholder="Ej: Durante la fase de pesaje">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Descripción</label>
-                        <textarea id="incDescripcion" class="form-control" rows="3"
-                            placeholder="Detalle lo sucedido..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger px-4 fw-bold" id="btnSaveIncidencia">Guardar
-                        Reporte</button>
+                <div class="modal-body p-4">
+                    <form id="form-reporte">
+                        <input type="hidden" id="edit-id">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Momento (Título)</label>
+                            <input type="text" id="rep-momento" class="form-control bg-light border-0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Laboratorio (Sede)</label>
+                            <select id="rep-lab" class="form-select bg-light border-0" required>
+                                <option value="">Seleccione laboratorio...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Técnico Responsable</label>
+                            <select id="rep-user" class="form-select bg-light border-0" required>
+                                <option value="">Seleccione técnico...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Descripción</label>
+                            <textarea id="rep-desc" class="form-control bg-light border-0" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-3" id="btnGuardar">Guardar Cambios</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script type="module">
         import { cargarSidebar } from './sidebar.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
-            authDomain: "labmanager-b85b1.firebaseapp.com",
-            projectId: "labmanager-b85b1",
-            storageBucket: "labmanager-b85b1.firebasestorage.app",
-            messagingSenderId: "651630503448",
-            appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
-        };
-
+        cargarSidebar('reportes');
+        const firebaseConfig = { apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", authDomain: "labmanager-b85b1.firebaseapp.com", projectId: "labmanager-b85b1", appId: "1:651630503448:web:9a327cbf30b84fd763c56d" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        cargarSidebar('reportes');
 
-        // CARGA DINÁMICA DE LABORATORIOS Y USUARIOS
-        const cargarSelectores = async () => {
-            const selectLab = document.getElementById('incLaboratorio');
-            const selectUser = document.getElementById('incUsuario');
+        let reportesLocales = [];
+        let filtroActual = 'todos';
+        const modalEl = new bootstrap.Modal(document.getElementById('modalReporte'));
 
-            // Cargar Laboratorios desde la colección 'laboratorios'
+        // --- CARGAR SPINNERS (LABS Y TÉCNICOS) ---
+        async function cargarDesplegables() {
             const labsSnap = await getDocs(collection(db, "laboratorios"));
-            selectLab.innerHTML = '<option value="" selected disabled>Seleccione laboratorio...</option>';
-            labsSnap.forEach(doc => {
-                const l = doc.data();
-                const opt = document.createElement('option');
-                opt.value = l.nombre;
-                opt.textContent = l.nombre;
-                selectLab.appendChild(opt);
-            });
+            const userSnap = await getDocs(collection(db, "usuarios"));
+            
+            const selLab = document.getElementById('rep-lab');
+            const selUser = document.getElementById('rep-user');
 
-            // Cargar Usuarios con su Rol
-            const usersSnap = await getDocs(collection(db, "usuarios"));
-            selectUser.innerHTML = '<option value="" selected disabled>Seleccione informante...</option>';
-            usersSnap.forEach(doc => {
-                const u = doc.data();
-                const opt = document.createElement('option');
-                opt.value = u.nombre; // Guardamos solo el nombre en la BD para la incidencia
-                opt.textContent = `${u.nombre} (${u.rol || 'Sin rol'})`; // Mostramos nombre + rol en el selector
-                selectUser.appendChild(opt);
-            });
-        };
+            selLab.innerHTML = '<option value="">Seleccione laboratorio...</option>';
+            labsSnap.forEach(d => selLab.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`);
 
-        cargarSelectores();
+            selUser.innerHTML = '<option value="">Seleccione técnico...</option>';
+            userSnap.forEach(d => selUser.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`);
+        }
 
-        // RENDERIZAR TABLA DE INCIDENCIAS
-        onSnapshot(collection(db, "incidencias"), (snapshot) => {
-            const body = document.getElementById('incidencias-body');
-            body.innerHTML = '';
-            snapshot.forEach(doc => {
-                const i = doc.data();
-                body.innerHTML += `
-                    <tr>
-                        <td class="ps-4 fw-bold text-dark">${i.laboratorio}</td>
-                        <td>
-                            <div class="small text-danger fw-bold text-uppercase" style="font-size:0.65rem;">${i.Momento}</div>
-                            <div>${i.Descripcion}</div>
-                        </td>
-                        <td class="text-primary fw-medium">${i.usuarioNombre}</td>
-                        <td class="text-end pe-4 text-muted small">${i.FechaDeRegistro}</td>
-                    </tr>`;
-            });
+        // --- LISTENER PRINCIPAL ---
+        onSnapshot(collection(db, "incidencias"), (snap) => {
+            reportesLocales = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderizar();
         });
 
-        // GUARDAR INCIDENCIA
-        document.getElementById('btnSaveIncidencia').onclick = async () => {
-            const lab = document.getElementById('incLaboratorio').value;
-            const user = document.getElementById('incUsuario').value;
-            const mom = document.getElementById('incMomento').value;
-            const des = document.getElementById('incDescripcion').value;
+        function renderizar() {
+            const cont = document.getElementById('lista-reportes');
+            cont.innerHTML = "";
+            const filtrados = reportesLocales.filter(r => filtroActual === 'todos' || r.estado === filtroActual);
 
-            if (!lab || !user || !des) return alert("Por favor complete todos los campos obligatorios.");
+            filtrados.forEach(r => {
+                const esCerrado = r.estado === 'cerrado';
+                cont.innerHTML += `
+                    <tr class="${esCerrado ? 'opacity-75' : ''}">
+                        <td class="ps-4">
+                            <div class="fw-bold">${r.Momento}</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 200px;">${r.Descripcion}</small>
+                        </td>
+                        <td><span class="badge bg-light text-dark border fw-normal">${r.laboratorio}</span></td>
+                        <td><div class="small fw-bold text-primary">${r.usuarioNombre}</div></td>
+                        <td><span class="small text-muted">${r.FechaDeRegistro}</span></td>
+                        <td><span class="badge ${esCerrado ? 'bg-secondary' : 'bg-warning'} rounded-pill">${r.estado}</span></td>
+                        <td class="text-end pe-4">
+                            <button onclick="prepararEdicion('${r.id}')" class="btn btn-sm btn-light text-primary rounded-circle me-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="borrarReporte('${r.id}')" class="btn btn-sm btn-light text-danger rounded-circle"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        }
 
-            try {
-                const fecha = new Date().toLocaleString('es-ES', {
-                    day: 'numeric', month: 'long', year: 'numeric',
-                    hour: 'numeric', minute: 'numeric'
-                }) + " UTC+1";
-
-                await addDoc(collection(db, "incidencias"), {
-                    laboratorio: lab,
-                    Momento: mom,
-                    Descripcion: des,
-                    FechaDeRegistro: fecha,
-                    usuarioNombre: user
-                });
-
-                bootstrap.Modal.getInstance(document.getElementById('modalIncidencia')).hide();
-                document.getElementById('modalIncidencia').querySelectorAll('input, textarea, select').forEach(el => el.value = '');
-            } catch (e) { console.error(e); }
+        // --- ACCIONES MODAL ---
+        window.abrirModalCrear = () => {
+            document.getElementById('form-reporte').reset();
+            document.getElementById('edit-id').value = "";
+            document.getElementById('modalTitulo').innerText = "Nuevo Reporte";
+            cargarDesplegables();
+            modalEl.show();
         };
+
+        window.prepararEdicion = async (id) => {
+            const r = reportesLocales.find(item => item.id === id);
+            await cargarDesplegables();
+            document.getElementById('edit-id').value = r.id;
+            document.getElementById('rep-momento').value = r.Momento;
+            document.getElementById('rep-lab').value = r.laboratorio;
+            document.getElementById('rep-user').value = r.usuarioNombre;
+            document.getElementById('rep-desc').value = r.Descripcion;
+            document.getElementById('modalTitulo').innerText = "Editar Reporte";
+            modalEl.show();
+        };
+
+        document.getElementById('form-reporte').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const datos = {
+                Momento: document.getElementById('rep-momento').value,
+                laboratorio: document.getElementById('rep-lab').value,
+                usuarioNombre: document.getElementById('rep-user').value,
+                Descripcion: document.getElementById('rep-desc').value,
+                estado: 'abierto',
+                FechaDeRegistro: new Date().toLocaleDateString('es-ES', {day:'numeric', month:'long'}) + " de 2026"
+            };
+
+            if (id) {
+                await updateDoc(doc(db, "incidencias", id), datos);
+            } else {
+                await addDoc(collection(db, "incidencias"), datos);
+            }
+            modalEl.hide();
+        });
+
+        window.borrarReporte = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "incidencias", id)); };
+        window.cambiarFiltro = (f, b) => { filtroActual = f; renderizar(); };
     </script>
 </body>
-
 </html>

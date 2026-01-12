@@ -20,6 +20,9 @@
                         <h2 class="fw-bold text-dark m-0">Administración de Usuarios</h2>
                         <p class="text-muted small m-0">Control de permisos y acceso al sistema.</p>
                     </div>
+                    <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onclick="abrirModalNuevoUsuario()">
+                        <i class="fas fa-user-plus me-2"></i>Añadir Usuario
+                    </button>
                 </div>
 
                 <div class="row g-3 bg-white p-3 rounded-4 shadow-sm border">
@@ -51,10 +54,46 @@
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="lista-usuarios">
-                            </tbody>
+                        <tbody id="lista-usuarios"></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalNuevoUsuario" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="fw-bold m-0 text-success">Registrar Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="form-nuevo-usuario">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nombre Completo</label>
+                            <input type="text" id="nuevo-nombre" class="form-control bg-light border-0 rounded-3" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Correo Electrónico</label>
+                            <input type="email" id="nuevo-email" class="form-control bg-light border-0 rounded-3" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Asignar Rol</label>
+                            <select id="nuevo-rol" class="form-select bg-light border-0 rounded-3" required>
+                                <option value="usuario">Usuario (Consulta)</option>
+                                <option value="tecnico">Técnico (Inventario)</option>
+                                <option value="Supervisor">Supervisor (Full)</option>
+                            </select>
+                        </div>
+                        <p class="text-muted" style="font-size: 0.75rem;">
+                            <i class="fas fa-info-circle me-1"></i> El usuario podrá acceder una vez que su correo esté registrado en el sistema.
+                        </p>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold shadow-sm">Crear Usuario</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -68,15 +107,12 @@
                 </div>
                 <div class="modal-body p-4">
                     <input type="hidden" id="user-id-rol">
-                    <p class="small text-muted mb-4">Selecciona el nuevo nivel de acceso para <b id="user-nombre-rol"></b>:</p>
-                    
-                    <div class="d-grid gap-2">
-                        <select id="select-nuevo-rol" class="form-select form-select-lg border-0 bg-light rounded-4">
-                            <option value="Supervisor">Supervisor (Gestión de Laboratorio)</option>
-                            <option value="tecnico">Técnico (Gestión de Inventario)</option>
-                            <option value="usuario">Usuario (Solo consulta)</option>
-                        </select>
-                    </div>
+                    <p class="small text-muted mb-4">Nuevo nivel de acceso para <b id="user-nombre-rol"></b>:</p>
+                    <select id="select-nuevo-rol" class="form-select form-select-lg border-0 bg-light rounded-4">
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="usuario">Usuario</option>
+                    </select>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
                     <button onclick="guardarNuevoRol()" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">Actualizar Rol</button>
@@ -89,7 +125,7 @@
     <script type="module">
         import { cargarSidebar } from './sidebar.js';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         cargarSidebar('usuarios');
 
@@ -105,32 +141,49 @@
 
         let todosLosUsuarios = [];
 
-        // --- BÚSQUEDA Y FILTRADO ---
+        // --- ABRIR MODAL NUEVO ---
+        window.abrirModalNuevoUsuario = () => {
+            document.getElementById('form-nuevo-usuario').reset();
+            new bootstrap.Modal(document.getElementById('modalNuevoUsuario')).show();
+        };
+
+        // --- GUARDAR NUEVO USUARIO ---
+        document.getElementById('form-nuevo-usuario').onsubmit = async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nuevo-nombre').value;
+            const email = document.getElementById('nuevo-email').value;
+            const rol = document.getElementById('nuevo-rol').value;
+
+            try {
+                await addDoc(collection(db, "usuarios"), {
+                    nombre: nombre,
+                    email: email,
+                    rol: rol,
+                    fechaCreacion: new Date().toISOString()
+                });
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevoUsuario')).hide();
+            } catch (error) {
+                alert("Error al crear usuario: " + error.message);
+            }
+        };
+
+        // --- FILTRADO Y TABLA ---
         const aplicarFiltros = () => {
             const texto = document.getElementById('busqueda-usuario').value.toLowerCase();
             const rolSeleccionado = document.getElementById('filtro-rol').value;
-            const cont = document.getElementById('lista-usuarios');
-            
             const filtrados = todosLosUsuarios.filter(u => {
-                const coincideTexto = u.nombre.toLowerCase().includes(texto) || u.email.toLowerCase().includes(texto);
+                const coincideTexto = (u.nombre || "").toLowerCase().includes(texto) || (u.email || "").toLowerCase().includes(texto);
                 const coincideRol = rolSeleccionado === "todos" || u.rol === rolSeleccionado;
                 return coincideTexto && coincideRol;
             });
-
             renderizarTabla(filtrados);
         };
 
-        document.getElementById('busqueda-usuario').oninput = aplicarFiltros;
-        document.getElementById('filtro-rol').onchange = aplicarFiltros;
-
-        // --- RENDERIZADO DE TABLA ---
         const renderizarTabla = (usuarios) => {
             const cont = document.getElementById('lista-usuarios');
             cont.innerHTML = "";
-            
             usuarios.forEach(u => {
-                const rolColor = u.rol === 'Supervisor' ? 'bg-danger' : (u.rol === 'Técnico' ? 'bg-primary' : 'bg-secondary');
-                
+                const rolColor = u.rol === 'Supervisor' ? 'bg-danger' : (u.rol === 'tecnico' ? 'bg-primary' : 'bg-secondary');
                 cont.innerHTML += `
                     <tr>
                         <td class="ps-4">
@@ -138,37 +191,27 @@
                                 <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
                                     <i class="fas fa-user text-muted"></i>
                                 </div>
-                                <div class="fw-bold text-dark">${u.nombre || 'Usuario'}</div>
+                                <div class="fw-bold text-dark">${u.nombre || 'Sin nombre'}</div>
                             </div>
                         </td>
                         <td><span class="text-muted small">${u.email}</span></td>
-                        <td>
-                            <span class="badge ${rolColor}-subtle ${rolColor.replace('bg-', 'text-')} rounded-pill px-3">
-                                ${u.rol.toUpperCase()}
-                            </span>
-                        </td>
+                        <td><span class="badge ${rolColor}-subtle ${rolColor.replace('bg-', 'text-')} rounded-pill px-3">${(u.rol || 'usuario').toUpperCase()}</span></td>
                         <td class="text-end pe-4">
-                            <button onclick="prepararCambioRol('${u.id}', '${u.nombre}', '${u.rol}')" class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-2">
-                                <i class="fas fa-user-shield"></i>
-                            </button>
-                            <button onclick="eliminarUsuario('${u.id}', '${u.nombre}')" class="btn btn-sm btn-light rounded-circle shadow-sm text-danger">
-                                <i class="fas fa-user-minus"></i>
-                            </button>
+                            <button onclick="prepararCambioRol('${u.id}', '${u.nombre}', '${u.rol}')" class="btn btn-sm btn-light rounded-circle shadow-sm text-primary me-2"><i class="fas fa-user-shield"></i></button>
+                            <button onclick="eliminarUsuario('${u.id}', '${u.nombre}')" class="btn btn-sm btn-light rounded-circle shadow-sm text-danger"><i class="fas fa-user-minus"></i></button>
                         </td>
                     </tr>`;
             });
         };
 
-        // --- ESCUCHA DE DATOS ---
         onSnapshot(collection(db, "usuarios"), (snap) => {
-            todosLosUsuarios = snap.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            todosLosUsuarios = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             aplicarFiltros();
         });
 
-        // --- LÓGICA DE CAMBIO DE ROL ---
+        document.getElementById('busqueda-usuario').oninput = aplicarFiltros;
+        document.getElementById('filtro-rol').onchange = aplicarFiltros;
+
         window.prepararCambioRol = (id, nombre, rolActual) => {
             document.getElementById('user-id-rol').value = id;
             document.getElementById('user-nombre-rol').innerText = nombre;
@@ -177,25 +220,17 @@
         };
 
         window.guardarNuevoRol = async () => {
-            const id = document.getElementById('user-id-rol').value;
-            const nuevoRol = document.getElementById('select-nuevo-rol').value;
-            
             try {
-                await updateDoc(doc(db, "usuarios", id), { rol: nuevoRol });
+                await updateDoc(doc(db, "usuarios", document.getElementById('user-id-rol').value), {
+                    rol: document.getElementById('select-nuevo-rol').value
+                });
                 bootstrap.Modal.getInstance(document.getElementById('modalRol')).hide();
-            } catch (error) {
-                alert("Error al actualizar permisos.");
-            }
+            } catch (error) { alert("Error al actualizar."); }
         };
 
-        // --- LÓGICA DE ELIMINACIÓN ---
         window.eliminarUsuario = async (id, nombre) => {
-            if (confirm(`¿Estás seguro de que deseas revocar el acceso a ${nombre}?`)) {
-                try {
-                    await deleteDoc(doc(db, "usuarios", id));
-                } catch (error) {
-                    alert("No se pudo eliminar al usuario.");
-                }
+            if (confirm(`¿Eliminar a ${nombre}?`)) {
+                await deleteDoc(doc(db, "usuarios", id));
             }
         };
     </script>
