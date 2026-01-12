@@ -13,126 +13,82 @@
 /* --- ESTILOS BASE --- */
 body {
     background-color: var(--bg-body);
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     color: var(--text-main);
     margin: 0;
+    overflow-x: hidden;
 }
 
-/* --- LAYOUT (ESTRUCTURA) --- */
+/* --- LAYOUT RESPONSIVO --- */
 #sidebar-container {
     width: 280px;
     position: fixed;
     height: 100vh;
-    z-index: 1000;
+    z-index: 1050;
+    transition: all 0.3s ease;
 }
 
 .main {
-    margin-left: 280px; /* Espacio para la sidebar fija */
-    padding: 2.5rem;
+    margin-left: 280px;
+    padding: 2rem;
     min-height: 100vh;
+    transition: all 0.3s ease;
 }
 
-/* --- SIDEBAR DINÁMICA --- */
-.sidebar {
+/* Navbar superior para móviles (oculta en escritorio) */
+.mobile-header {
+    display: none;
     background: var(--sidebar-bg);
-    width: 280px;
-    height: 100vh;
-    padding: 2rem 1.5rem;
-    color: var(--white);
+    color: white;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1060;
 }
 
-.nav-link {
-    color: #94a3b8 !important;
-    padding: 0.8rem 1rem !important;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-}
-
-.nav-link:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--white) !important;
-}
-
-.nav-link.active {
-    background: var(--primary) !important;
-    color: var(--white) !important;
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
-}
-
-.nav-link i {
-    width: 25px;
-    font-size: 1.1rem;
-}
-
-/* --- COMPONENTES (TARJETAS Y TABLAS) --- */
+/* --- COMPONENTES --- */
 .card-custom {
     background: var(--white);
     border-radius: 16px;
-    border: none;
     box-shadow: var(--shadow);
     padding: 1.5rem;
-    transition: transform 0.2s ease;
+    height: 100%;
 }
 
-.table {
-    border-collapse: separate;
-    border-spacing: 0 8px;
+.scroll-section {
+    max-height: 500px;
+    overflow-y: auto;
 }
 
-.table thead th {
-    border: none;
-    color: var(--text-muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-}
+/* --- MEDIA QUERIES (MAGIA RESPONSIVA) --- */
 
-.table tbody tr {
-    background: var(--white);
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.table td {
-    padding: 1.25rem 1rem;
-    border: none;
-    vertical-align: middle;
-}
-
-/* --- BOTONES Y ELEMENTOS UI --- */
-.btn-primary {
-    background-color: var(--primary);
-    border: none;
-    padding: 0.6rem 1.5rem;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-.form-control, .form-select {
-    border-radius: 10px;
-    padding: 0.75rem;
-    border: 1px solid #e2e8f0;
-}
-
-.badge {
-    padding: 0.5em 0.8em;
-    border-radius: 8px;
-    font-weight: 600;
-}
-
-/* --- RESPONSIVIDAD BÁSICA --- */
+/* Tablets y Escritorios Pequeños */
 @media (max-width: 992px) {
-    .sidebar { width: 80px; padding: 1rem; }
-    .sidebar h4, .sidebar hr, .nav-link span { display: none; }
-    .main { margin-left: 80px; }
+    #sidebar-container {
+        transform: translateX(-100%); /* Escondemos la sidebar */
+    }
+    
+    #sidebar-container.active {
+        transform: translateX(0); /* La mostramos cuando se activa */
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Móviles */
+@media (max-width: 576px) {
+    .card-custom {
+        padding: 1rem;
+    }
+    
+    h2 { font-size: 1.5rem; }
 }
