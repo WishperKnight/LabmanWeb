@@ -6,15 +6,13 @@
     <title>Laboratorios | Lab Track</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <style>
-        .card-premium { border-radius: 1.2rem; background: white; transition: 0.3s; }
-        .card-premium:hover { transform: translateY(-5px); }
+        .card-premium { border-radius: 1.2rem; background: white; transition: 0.3s; border: none; }
+        .card-premium:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
         .icon-box-lg { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .modal-content { border-radius: 1.5rem; border: none; }
     </style>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
-
 </head>
 <body class="bg-light">
 
@@ -28,13 +26,17 @@
                     <h2 class="fw-bold text-dark m-0">Unidades de Laboratorio</h2>
                     <p class="text-muted small m-0">Gestión de sedes, responsables y capacidad.</p>
                 </div>
-                <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onclick="abrirModalCrear()">
+                <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" id="btn-nueva-unidad">
                     <i class="fas fa-plus me-2"></i>Nueva Unidad
                 </button>
             </header>
 
             <div class="row g-4" id="contenedor-laboratorios">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Cargando unidades...</p>
                 </div>
+            </div>
         </div>
     </div>
 
@@ -51,25 +53,24 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Nombre del Laboratorio</label>
-                                <input type="text" id="lab-nombre" class="form-control bg-light border-0" placeholder="Ej: Laboratorio de Química" required>
+                                <input type="text" id="lab-nombre" class="form-control bg-light border-0" required>
                             </div>
                             <div class="col-12">
-                                <label class="form-label small fw-bold">Responsable (Supervisor)</label>
-                                <select id="lab-responsable" class="form-select bg-light border-0" required>
-                                    </select>
+                                <label class="form-label small fw-bold">Responsable</label>
+                                <select id="lab-responsable" class="form-select bg-light border-0" required></select>
                             </div>
                             <div class="col-md-8">
-                                <label class="form-label small fw-bold">Ubicación / Sede</label>
-                                <input type="text" id="lab-ubicacion" class="form-control bg-light border-0" placeholder="Ej: Planta 2, Edificio A">
+                                <label class="form-label small fw-bold">Ubicación</label>
+                                <input type="text" id="lab-ubicacion" class="form-control bg-light border-0">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">Cupo Máximo</label>
-                                <input type="number" id="lab-capacidad" class="form-control bg-light border-0" value="20">
+                                <label class="form-label small fw-bold">Cupo</label>
+                                <input type="number" id="lab-capacidad" class="form-control bg-light border-0">
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -80,219 +81,53 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow-lg">
                 <div class="modal-header border-0 px-4 pt-4">
-                    <h5 class="fw-bold m-0 text-dark">Inventario en esta sede</h5>
+                    <h5 class="fw-bold m-0 text-dark">Inventario en sede</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="bg-light small fw-bold text-uppercase">
-                                <tr>
-                                    <th class="ps-4 py-3">Equipo</th>
-                                    <th>Estado</th>
-                                    <th class="pe-4 text-end">Serial</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lista-equipos-lab">
-                                </tbody>
-                        </table>
-                    </div>
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light small fw-bold text-uppercase">
+                            <tr>
+                                <th class="ps-4 py-3">Equipo</th>
+                                <th>Estado</th>
+                                <th class="pe-4 text-end">Serial</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-equipos-lab"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <script type="module">
+    import { LaboratorioController } from './js/controllers/LaboratorioController.js';
+    import { cargarSidebar } from './js/sidebar.js';
 
-    <script type="module">
-        import { cargarSidebar } from './sidebar.js';
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA",
-            authDomain: "labmanager-b85b1.firebaseapp.com",
-            projectId: "labmanager-b85b1",
-            appId: "1:651630503448:web:9a327cbf30b84fd763c56d"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Inicialización única de modales para evitar bloqueos de pantalla
-        const elModalLab = document.getElementById('modalLab');
-        const modalLab = new bootstrap.Modal(elModalLab);
-        
-        const elModalVerEq = document.getElementById('modalVerEquipos');
-        const modalVerEq = new bootstrap.Modal(elModalVerEq);
-
-        cargarSidebar('laboratorios');
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const q = query(collection(db, "laboratorios"), where("adminId", "==", user.uid));
-                onSnapshot(q, (snap) => {
-                    renderizarLaboratorios(snap);
-                });
-            } else {
-                window.location.href = "login.html";
+    // Función de inicio seguro
+    const iniciarApp = () => {
+        try {
+            cargarSidebar('laboratorios');
+            
+            if (LaboratorioController) {
+                LaboratorioController.init();
+                console.log("✅ Controlador de Laboratorios iniciado");
             }
-        });
-
-        const cargarSupervisores = async () => {
-            const selectResp = document.getElementById('lab-responsable');
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                const q = query(
-                    collection(db, "usuarios"), 
-                    where("rol", "==", "Supervisor"),
-                    where("adminId", "==", user.uid) 
-                );
-                const snap = await getDocs(q);
-                
-                selectResp.innerHTML = '<option value="" disabled selected>Seleccione un supervisor...</option>';
-                snap.forEach(d => {
-                    const u = d.data();
-                    selectResp.innerHTML += `<option value="${u.nombre}">${u.nombre}</option>`;
-                });
-            } catch (error) {
-                console.error("Error supervisores:", error);
-            }
-        };
-
-        async function renderizarLaboratorios(snap) {
-            const cont = document.getElementById('contenedor-laboratorios');
-            cont.innerHTML = "";
-
-            for (const d of snap.docs) {
-                const lab = d.data();
-                const id = d.id;
-                const responsable = lab.responsable || "Sin asignar";
-                
-                const col = document.createElement('div');
-                col.className = "col-md-6 col-xl-4";
-                col.innerHTML = `
-                    <div class="card-premium border-0 shadow-sm p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="icon-box-lg bg-primary-subtle text-primary"><i class="fas fa-building"></i></div>
-                            <div class="d-flex gap-2">
-                                <button onclick="abrirModalEditar('${id}','${lab.nombre}','${responsable}','${lab.ubicacion}','${lab.capacidad}')" class="btn btn-sm btn-light rounded-circle shadow-sm">
-                                    <i class="fas fa-pen text-primary"></i>
-                                </button>
-                                <button onclick="eliminarLaboratorio('${id}','${lab.nombre}')" class="btn btn-sm btn-light rounded-circle shadow-sm">
-                                    <i class="fas fa-trash text-danger"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <h5 class="fw-bold mb-1 text-dark">${lab.nombre}</h5>
-                        <p class="text-muted small mb-3"><i class="fas fa-map-marker-alt me-1 text-primary"></i> ${lab.ubicacion || 'Sede principal'}</p>
-                        
-                        <div class="bg-light rounded-4 p-3 d-flex justify-content-around mb-4 border border-white">
-                            <div class="text-center">
-                                <span class="d-block h5 fw-bold mb-0 text-primary" id="count-${id}">...</span>
-                                <small class="text-muted fw-bold" style="font-size:0.6rem">EQUIPOS</small>
-                            </div>
-                            <div class="vr opacity-25"></div>
-                            <div class="text-center">
-                                <span class="d-block h5 fw-bold mb-0 text-dark">${lab.capacidad}</span>
-                                <small class="text-muted fw-bold" style="font-size:0.6rem">CUPO MÁX</small>
-                            </div>
-                        </div>
-                        <button onclick="verEquiposDelLab('${lab.nombre}')" class="btn btn-primary w-100 rounded-pill fw-bold btn-sm py-2 shadow-sm">
-                            <i class="fas fa-list-ul me-2"></i>Ver Inventario
-                        </button>
-                    </div>`;
-                cont.appendChild(col);
-
-                // Contador de equipos en tiempo real
-                const qE = query(
-                    collection(db, "equipos"), 
-                    where("laboratorio", "==", lab.nombre),
-                    where("adminId", "==", auth.currentUser.uid)
-                );
-                const snapE = await getDocs(qE);
-                const el = document.getElementById(`count-${id}`);
-                if(el) el.innerText = snapE.size;
-            }
+        } catch (error) {
+            console.error("❌ Error al inicializar:", error);
+            // Si hay error, quitamos el spinner para no engañar al usuario
+            const contenedor = document.getElementById('contenedor-laboratorios');
+            if (contenedor) contenedor.innerHTML = `<p class="text-danger text-center">Error al conectar con la base de datos.</p>`;
         }
+    };
 
-        document.getElementById('form-lab').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('lab-id').value;
-            const user = auth.currentUser;
-
-            const datos = {
-                adminId: user.uid,
-                nombre: document.getElementById('lab-nombre').value,
-                responsable: document.getElementById('lab-responsable').value,
-                ubicacion: document.getElementById('lab-ubicacion').value,
-                capacidad: document.getElementById('lab-capacidad').value,
-                fechaModificacion: new Date().toISOString()
-            };
-
-            try {
-                if (id) {
-                    await updateDoc(doc(db, "laboratorios", id), datos);
-                } else {
-                    await addDoc(collection(db, "laboratorios"), datos);
-                }
-                modalLab.hide();
-            } catch (err) {
-                alert("Error al guardar: " + err.message);
-            }
-        };
-
-        window.abrirModalCrear = async () => {
-            document.getElementById('form-lab').reset();
-            document.getElementById('lab-id').value = "";
-            document.getElementById('modal-titulo').innerText = "Registrar Nueva Unidad";
-            await cargarSupervisores();
-            modalLab.show();
-        };
-
-        window.abrirModalEditar = async (id, nombre, resp, ubica, cap) => {
-            document.getElementById('lab-id').value = id;
-            document.getElementById('lab-nombre').value = nombre;
-            document.getElementById('lab-ubicacion').value = ubica;
-            document.getElementById('lab-capacidad').value = cap;
-            document.getElementById('modal-titulo').innerText = "Modificar Laboratorio";
-            await cargarSupervisores();
-            document.getElementById('lab-responsable').value = resp;
-            modalLab.show();
-        };
-
-        window.eliminarLaboratorio = async (id, nombre) => {
-            if (confirm(`¿Eliminar permanentemente "${nombre}"?`)) {
-                await deleteDoc(doc(db, "laboratorios", id));
-            }
-        };
-
-        window.verEquiposDelLab = async (nombreLab) => {
-            const cont = document.getElementById('lista-equipos-lab');
-            cont.innerHTML = `<tr><td colspan="3" class="text-center p-4">Cargando...</td></tr>`;
-            modalVerEq.show();
-
-            const q = query(
-                collection(db, "equipos"), 
-                where("laboratorio", "==", nombreLab),
-                where("adminId", "==", auth.currentUser.uid)
-            );
-            const snap = await getDocs(q);
-            cont.innerHTML = snap.empty ? `<tr><td colspan="3" class="text-center p-4 text-muted">No hay activos vinculados.</td></tr>` : "";
-            snap.forEach(d => {
-                const e = d.data();
-                cont.innerHTML += `
-                    <tr>
-                        <td class="ps-4"><b>${e.nombre}</b></td>
-                        <td><span class="badge bg-light text-dark border">${e.estado}</span></td>
-                        <td class="pe-4 text-end small text-muted">${e.serial || 'S/N'}</td>
-                    </tr>`;
-            });
-        };
-    </script>
+    // Ejecutar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', iniciarApp);
+    } else {
+        iniciarApp();
+    }
+</script>
 </body>
 </html>

@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Reportes | Lab Track</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
-
+    <link rel="stylesheet" href="./css/style.css">
 </head>
+
 <body class="bg-light">
+
     <div id="sidebar-container"></div>
 
     <div class="main">
-        <div class="container-fluid">
-            <header class="d-flex justify-content-between align-items-center mb-5 mt-4">
+        <div class="container-fluid py-4">
+
+            <header class="d-flex justify-content-between align-items-center mb-5">
                 <div>
                     <h2 class="fw-bold text-dark m-0">Historial de Reportes</h2>
                     <p class="text-muted small m-0">Gestión y seguimiento de incidencias en laboratorio.</p>
                 </div>
                 <div class="d-flex gap-3 align-items-center">
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onclick="abrirModalCrear()">
+                    <button id="btn-nuevo-reporte" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
                         <i class="fas fa-plus me-2"></i>Nuevo Reporte
                     </button>
-                    
+
                     <div class="btn-group bg-white shadow-sm p-1 rounded-pill border" id="grupo-filtros">
-                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="cambiarFiltro('todos', this)">Todos</button>
-                        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="cambiarFiltro('abierto', this)">Abiertos</button>
-                        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="cambiarFiltro('cerrado', this)">Cerrados</button>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 filter-btn"
+                            data-filter="todos">Todos</button>
+                        <button class="btn btn-sm btn-light rounded-pill px-3 filter-btn"
+                            data-filter="abierto">Abiertos</button>
+                        <button class="btn btn-sm btn-light rounded-pill px-3 filter-btn"
+                            data-filter="cerrado">Cerrados</button>
                     </div>
                 </div>
             </header>
@@ -38,16 +44,21 @@
                     <table class="table align-middle mb-0">
                         <thead class="bg-light text-muted small fw-bold text-uppercase">
                             <tr>
-                                <th class="ps-4">Incidencia / Descripción</th>
-                                <th>Sede</th>
-                                <th>Responsable</th>
-                                <th>Fecha</th>
+                                <th class="ps-4 py-3">Incidencia</th>
+                                <th class="d-none d-md-table-cell">Sede</th>
+                                <th class="d-none d-sm-table-cell">Responsable</th>
+                                <th class="d-none d-lg-table-cell">Fecha</th>
                                 <th>Estado</th>
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="lista-reportes">
-                            <tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="text-muted mt-2 small">Cargando incidencias...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -55,7 +66,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalReporte" tabindex="-1">
+    <div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header border-0 pt-4 px-4">
@@ -65,29 +76,38 @@
                 <div class="modal-body p-4">
                     <form id="form-reporte">
                         <input type="hidden" id="edit-id">
+
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Título de la Incidencia</label>
-                            <input type="text" id="rep-momento" class="form-control bg-light border-0" placeholder="Ej: Falla en Centrífuga" required>
+                            <input type="text" id="rep-momento" class="form-control bg-light border-0"
+                                placeholder="Ej: Falla en Centrífuga" required>
                         </div>
+
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label small fw-bold">Laboratorio</label>
                                 <select id="rep-lab" class="form-select bg-light border-0" required>
-                                    <option value="">Cargando...</option>
                                 </select>
                             </div>
                             <div class="col">
-                                <label class="form-label small fw-bold">Técnico</label>
+                                <label class="form-label small fw-bold">Técnico Asignado</label>
                                 <select id="rep-user" class="form-select bg-light border-0" required>
-                                    <option value="">Cargando...</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label small fw-bold">Descripción Detallada</label>
-                            <textarea id="rep-desc" class="form-control bg-light border-0" rows="4" required></textarea>
+                            <textarea id="rep-desc" class="form-control bg-light border-0" rows="4"
+                                placeholder="Describa el problema y los pasos tomados..." required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow-sm">Guardar Incidencia</button>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light w-100 rounded-pill fw-bold"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">Guardar
+                                Reporte</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -95,154 +115,28 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script type="module">
-        import { cargarSidebar } from './sidebar.js';
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // Importamos el controlador
+        import { ReportesController } from './js/controllers/ReportesController.js';
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
-            authDomain: "labmanager-b85b1.firebaseapp.com", 
-            projectId: "labmanager-b85b1", 
-            appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const modalEl = new bootstrap.Modal(document.getElementById('modalReporte'));
+        // Intentamos cargar el sidebar por separado
+        // Nota: Asegúrate de que la ruta a sidebar.js sea correcta
+        import { cargarSidebar } from './js/sidebar.js';
 
-        let reportesLocales = [];
-        let filtroActual = 'todos';
-
-        cargarSidebar('reportes');
-
-        // --- PROTECCIÓN DE DATOS POR ADMIN ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const q = query(collection(db, "incidencias"), where("adminId", "==", user.uid));
-                onSnapshot(q, (snap) => {
-                    reportesLocales = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderizar();
-                });
-            } else {
-                window.location.href = "login.html";
-            }
-        });
-
-        async function cargarDesplegables() {
-            const user = auth.currentUser;
-            const qLabs = query(collection(db, "laboratorios"), where("adminId", "==", user.uid));
-            const qUsers = query(collection(db, "usuarios"), where("adminId", "==", user.uid));
-            
-            const [labsSnap, userSnap] = await Promise.all([getDocs(qLabs), getDocs(qUsers)]);
-            
-            const selLab = document.getElementById('rep-lab');
-            const selUser = document.getElementById('rep-user');
-
-            selLab.innerHTML = '<option value="">Seleccione laboratorio...</option>';
-            labsSnap.forEach(d => selLab.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`);
-
-            selUser.innerHTML = '<option value="">Seleccione técnico...</option>';
-            userSnap.forEach(d => selUser.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`);
-        }
-
-        function renderizar() {
-            const cont = document.getElementById('lista-reportes');
-            cont.innerHTML = "";
-            
-            const filtrados = reportesLocales.filter(r => 
-                filtroActual === 'todos' || r.estado === filtroActual
-            ).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-            if (filtrados.length === 0) {
-                cont.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted">No hay reportes que mostrar</td></tr>';
-                return;
+        try {
+            // Inicializar Sidebar
+            if (typeof cargarSidebar === 'function') {
+                cargarSidebar('reportes');
             }
 
-            filtrados.forEach(r => {
-                const esCerrado = r.estado === 'cerrado';
-                cont.innerHTML += `
-                    <tr class="${esCerrado ? 'bg-light opacity-75' : ''}">
-                        <td class="ps-4">
-                            <div class="fw-bold text-dark">${r.Momento}</div>
-                            <small class="text-muted text-truncate d-block" style="max-width: 250px;">${r.Descripcion}</small>
-                        </td>
-                        <td><span class="badge bg-primary-subtle text-primary border-0 rounded-pill px-3">${r.laboratorio}</span></td>
-                        <td><div class="small fw-bold">${r.usuarioNombre}</div></td>
-                        <td><span class="small text-muted">${r.FechaDeRegistro}</span></td>
-                        <td>
-                            <select onchange="cambiarEstadoIncidencia('${r.id}', this.value)" class="form-select form-select-sm border-0 shadow-sm rounded-pill ${esCerrado ? 'bg-secondary text-white' : 'bg-warning text-dark fw-bold'}">
-                                <option value="abierto" ${r.estado === 'abierto' ? 'selected' : ''}>Abierto</option>
-                                <option value="cerrado" ${r.estado === 'cerrado' ? 'selected' : ''}>Cerrado</option>
-                            </select>
-                        </td>
-                        <td class="text-end pe-4">
-                            <button onclick="prepararEdicion('${r.id}')" class="btn btn-sm btn-white shadow-sm rounded-circle text-primary me-1"><i class="fas fa-pen"></i></button>
-                            <button onclick="borrarReporte('${r.id}')" class="btn btn-sm btn-white shadow-sm rounded-circle text-danger"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            });
+            // Inicializar Controlador MVC
+            ReportesController.init();
+
+        } catch (error) {
+            console.error("Error al inicializar la aplicación:", error);
         }
-
-        // --- CRUD Y ACCIONES ---
-        document.getElementById('form-reporte').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-id').value;
-            const user = auth.currentUser;
-
-            const datos = {
-                adminId: user.uid,
-                Momento: document.getElementById('rep-momento').value,
-                laboratorio: document.getElementById('rep-lab').value,
-                usuarioNombre: document.getElementById('rep-user').value,
-                Descripcion: document.getElementById('rep-desc').value,
-                estado: 'abierto',
-                timestamp: Date.now(),
-                FechaDeRegistro: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
-            };
-
-            try {
-                id ? await updateDoc(doc(db, "incidencias", id), { ...datos, timestamp: reportesLocales.find(x => x.id === id).timestamp }) 
-                   : await addDoc(collection(db, "incidencias"), datos);
-                modalEl.hide();
-            } catch (err) { alert(err.message); }
-        });
-
-        window.cambiarEstadoIncidencia = async (id, nuevoEstado) => {
-            await updateDoc(doc(db, "incidencias", id), { estado: nuevoEstado });
-        };
-
-        window.borrarReporte = async (id) => { 
-            if(confirm("¿Eliminar este reporte permanentemente?")) await deleteDoc(doc(db, "incidencias", id)); 
-        };
-
-        window.cambiarFiltro = (f, btn) => {
-            filtroActual = f;
-            document.querySelectorAll('#grupo-filtros .btn').forEach(b => b.classList.replace('btn-primary', 'btn-light'));
-            btn.classList.replace('btn-light', 'btn-primary');
-            renderizar();
-        };
-
-        window.abrirModalCrear = () => {
-            document.getElementById('form-reporte').reset();
-            document.getElementById('edit-id').value = "";
-            document.getElementById('modalTitulo').innerText = "Nuevo Reporte";
-            cargarDesplegables();
-            modalEl.show();
-        };
-
-        window.prepararEdicion = async (id) => {
-            const r = reportesLocales.find(item => item.id === id);
-            await cargarDesplegables();
-            document.getElementById('edit-id').value = r.id;
-            document.getElementById('rep-momento').value = r.Momento;
-            document.getElementById('rep-lab').value = r.laboratorio;
-            document.getElementById('rep-user').value = r.usuarioNombre;
-            document.getElementById('rep-desc').value = r.Descripcion;
-            document.getElementById('modalTitulo').innerText = "Editar Reporte";
-            modalEl.show();
-        };
     </script>
 </body>
+
 </html>

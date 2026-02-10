@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipos Técnicos | Lab Track</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
+    
     <style>
         .card-premium { border-radius: 1.2rem; overflow: hidden; }
-        .table thead { background-color: #f8f9fa; }
         .badge-status { font-size: 0.7rem; font-weight: 600; padding: 0.5em 1em; }
         .btn-action { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-action:hover { transform: translateY(-2px); }
+        .table thead th { background-color: #f8f9fa; border-top: none; }
     </style>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
 
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
 </head>
 <body class="bg-light">
 
@@ -28,14 +30,14 @@
             <header class="d-flex justify-content-between align-items-center mb-5 mt-2">
                 <div>
                     <h2 class="fw-bold text-dark m-0">Gestión de Equipos</h2>
-                    <p class="text-muted small m-0">Inventario técnico y control de stock.</p>
+                    <p class="text-muted small m-0">Inventario técnico y control de stock operativo.</p>
                 </div>
                 <div class="d-flex gap-2">
-                    <label class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-bold mb-0">
+                    <label class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-bold mb-0" style="cursor: pointer;">
                         <i class="fas fa-file-csv me-2"></i>Importar
                         <input type="file" id="input-csv" accept=".csv" hidden>
                     </label>
-                    <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onclick="abrirModalNuevo()">
+                    <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" id="btn-abrir-modal">
                         <i class="fas fa-plus me-2"></i>Nuevo Equipo
                     </button>
                 </div>
@@ -47,7 +49,7 @@
                         <thead class="text-muted small fw-bold text-uppercase">
                             <tr>
                                 <th class="ps-4 py-3">Equipo / Modelo</th>
-                                <th>S/N (Serial) / Marca</th>
+                                <th>S/N / Marca</th>
                                 <th>Categoría / Stock</th>
                                 <th>Sede/Lab</th>
                                 <th>Estado</th>
@@ -55,7 +57,7 @@
                             </tr>
                         </thead>
                         <tbody id="lista-equipos">
-                            <tr><td colspan="6" class="text-center p-5 text-muted">Cargando inventario...</td></tr>
+                            <tr><td colspan="6" class="text-center p-5 text-muted small">Conectando con el servidor...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -64,18 +66,20 @@
                     <div class="text-muted small">
                         Mostrando <span id="pag-inicio" class="fw-bold">0</span> - <span id="pag-fin" class="fw-bold">0</span> de <span id="pag-total" class="fw-bold">0</span> registros
                     </div>
-                    <nav><ul class="pagination pagination-sm m-0 gap-1" id="controles-paginacion"></ul></nav>
+                    <nav>
+                        <ul class="pagination pagination-sm m-0 gap-1" id="controles-paginacion"></ul>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modalEquipo" tabindex="-1">
+    <div class="modal fade" id="modalEquipo" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header border-0 px-4 pt-4">
                     <h5 class="fw-bold m-0 text-primary" id="modal-titulo">Ficha Técnica de Equipo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="form-equipo">
                     <input type="hidden" id="eq-id">
@@ -83,23 +87,23 @@
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label small fw-bold">Nombre del Equipo</label>
-                                <input type="text" id="eq-nombre" class="form-control bg-light border-0" required>
+                                <input type="text" id="eq-nombre" class="form-control bg-light border-0" placeholder="Ej: Espectrofotómetro" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Número de Serie (S/N)</label>
-                                <input type="text" id="eq-serial" class="form-control bg-light border-0">
+                                <input type="text" id="eq-serial" class="form-control bg-light border-0" placeholder="SN-12345">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Modelo / Referencia</label>
-                                <input type="text" id="eq-modelo" class="form-control bg-light border-0">
+                                <input type="text" id="eq-modelo" class="form-control bg-light border-0" placeholder="Gen 5 Pro">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Fabricante / Marca</label>
-                                <input type="text" id="eq-fabricante" class="form-control bg-light border-0">
+                                <input type="text" id="eq-fabricante" class="form-control bg-light border-0" placeholder="Thermo Fisher">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Stock Actual</label>
-                                <input type="number" id="eq-stock" class="form-control bg-light border-0" value="1">
+                                <input type="number" id="eq-stock" class="form-control bg-light border-0" value="1" min="0">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Categoría</label>
@@ -113,24 +117,29 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Laboratorio (Sede)</label>
-                                <select id="eq-lab" class="form-select bg-light border-0" required></select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">Estado Actual</label>
-                                <select id="eq-estado" class="form-select bg-light border-0">
-                                    <option value="Operativo">Operativo</option>
-                                    <option value="Mantenimiento">Mantenimiento</option>
-                                    <option value="Fuera de Servicio">Fuera de Servicio</option>
+                                <select id="eq-lab" class="form-select bg-light border-0" required>
+                                    <option value="" disabled selected>Cargando sedes...</option>
                                 </select>
                             </div>
+                            <div class="col-md-12">
+                                <label class="form-label small fw-bold">Estado del Equipo</label>
+                                <div class="d-flex gap-2">
+                                    <select id="eq-estado" class="form-select bg-light border-0">
+                                        <option value="Operativo">Operativo</option>
+                                        <option value="Mantenimiento">Mantenimiento</option>
+                                        <option value="Fuera de Servicio">Fuera de Servicio</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="col-12">
-                                <label class="form-label small fw-bold">Observaciones</label>
-                                <textarea id="eq-obs" class="form-control bg-light border-0" rows="2"></textarea>
+                                <label class="form-label small fw-bold">Observaciones Técnicas</label>
+                                <textarea id="eq-obs" class="form-control bg-light border-0" rows="3" placeholder="Anotaciones sobre calibración o fallos..."></textarea>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">Guardar Cambios</button>
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Guardar Ficha</button>
                     </div>
                 </form>
             </div>
@@ -140,193 +149,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // Importamos el sidebar y el controlador maestro de equipos
+        import { cargarSidebar } from './js/sidebar.js';
+        import { EquiposController } from './js/controllers/EquiposController.js';
 
-        // Carga segura de módulos locales
-        let cargarSidebar, importarCSV, mostrarFeedback;
-        async function loadModules() {
-            try {
-                const modS = await import('./sidebar.js');
-                cargarSidebar = modS.cargarSidebar;
-                cargarSidebar('equipos');
-            } catch(e) { console.error("Error sidebar:", e); }
+        // Iniciamos UI
+        cargarSidebar('equipos');
 
-            try {
-                const modC = await import('./importador-csv.js');
-                importarCSV = modC.importarCSV;
-                mostrarFeedback = modC.mostrarFeedback;
-            } catch(e) { console.error("Error importador:", e); }
-        }
-        loadModules();
-
-        const firebaseConfig = { 
-            apiKey: "AIzaSyA_aXLKh1HXcXGD1_s7mA7VuCPsSm1IBPA", 
-            authDomain: "labmanager-b85b1.firebaseapp.com", 
-            projectId: "labmanager-b85b1", 
-            appId: "1:651630503448:web:9a327cbf30b84fd763c56d" 
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const modalEq = new bootstrap.Modal(document.getElementById('modalEquipo'));
-
-        let currentAdminId = null;
-        let todosLosEquipos = [];
-        let paginaActual = 1;
-        const registrosPorPagina = 10;
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentAdminId = user.uid;
-                iniciarEscuchas();
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        function iniciarEscuchas() {
-            const qEq = query(collection(db, "equipos"), where("adminId", "==", currentAdminId));
-            onSnapshot(qEq, (snap) => {
-                todosLosEquipos = snap.docs.map(d => ({ id: d.id, data: d.data() }));
-                todosLosEquipos.sort((a, b) => (a.data.nombre || "").localeCompare(b.data.nombre || ""));
-                renderizarPagina();
-            });
-
-            const qLab = query(collection(db, "laboratorios"), where("adminId", "==", currentAdminId));
-            onSnapshot(qLab, (snap) => {
-                const select = document.getElementById('eq-lab');
-                select.innerHTML = '<option value="" disabled selected>Seleccionar sede...</option>';
-                snap.forEach(d => select.innerHTML += `<option value="${d.data().nombre}">${d.data().nombre}</option>`);
-            });
-        }
-
-        function renderizarPagina() {
-            const cont = document.getElementById('lista-equipos');
-            const total = todosLosEquipos.length;
-            const inicio = (paginaActual - 1) * registrosPorPagina;
-            const fin = Math.min(inicio + registrosPorPagina, total);
-            const items = todosLosEquipos.slice(inicio, fin);
-
-            cont.innerHTML = items.length === 0 ? '<tr><td colspan="6" class="text-center p-5 text-muted">No hay equipos en tu inventario.</td></tr>' : "";
-
-            items.forEach(obj => {
-                const e = obj.data;
-                const id = obj.id;
-                
-                let badgeClass = "bg-success-subtle text-success border-success";
-                if (e.estado === 'Mantenimiento') badgeClass = "bg-warning-subtle text-warning-emphasis border-warning";
-                if (e.estado === 'Fuera de Servicio') badgeClass = "bg-danger-subtle text-danger border-danger";
-
-                cont.innerHTML += `
-                    <tr class="align-middle border-bottom">
-                        <td class="ps-4 py-3">
-                            <div class="d-flex flex-column">
-                                <span class="fw-bold text-primary mb-0">${e.nombre || 'Sin nombre'}</span>
-                                <span class="text-muted small text-uppercase">${e.modelo || '-'}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex flex-column">
-                                <span class="badge bg-dark text-white mb-1 align-self-start" style="font-size: 0.65rem; letter-spacing: 0.5px;">
-                                    ${e.serial || 'S/N'}
-                                </span>
-                                <span class="text-muted small text-uppercase">${e.fabricante || '-'}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex flex-column">
-                                <span class="badge bg-light text-dark border fw-medium mb-1 align-self-start">${e.tipo || 'Otros'}</span>
-                                <span class="small text-danger fw-bold"><i class="fas fa-boxes me-1"></i>Stock: ${e.stock || '0'}</span>
-                            </div>
-                        </td>
-                        <td><div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i>${e.laboratorio || 'General'}</div></td>
-                        <td><span class="badge border badge-status rounded-pill ${badgeClass}">${(e.estado || 'Operativo').toUpperCase()}</span></td>
-                        <td class="text-end pe-4">
-                            <div class="d-flex justify-content-end gap-1">
-                                <button class="btn btn-action btn-light text-primary rounded-circle border-0 shadow-sm" onclick="editarEquipo('${id}')"><i class="fas fa-pen fa-xs"></i></button>
-                                <button class="btn btn-action btn-light text-danger rounded-circle border-0 shadow-sm" onclick="eliminarEquipo('${id}', '${e.nombre}')"><i class="fas fa-trash fa-xs"></i></button>
-                            </div>
-                        </td>
-                    </tr>`;
-            });
-            actualizarPaginador(total, inicio, fin);
-        }
-
-        function actualizarPaginador(total, inicio, fin) {
-            document.getElementById('pag-inicio').innerText = total === 0 ? 0 : inicio + 1;
-            document.getElementById('pag-fin').innerText = fin;
-            document.getElementById('pag-total').innerText = total;
-            const paginasTotales = Math.ceil(total / registrosPorPagina);
-            const nav = document.getElementById('controles-paginacion');
-            nav.innerHTML = "";
-            for (let i = 1; i <= paginasTotales; i++) {
-                nav.innerHTML += `<li class="page-item ${i === paginaActual ? 'active' : ''}"><a class="page-link border-0 rounded-pill mx-1" href="javascript:void(0)" onclick="cambiarPagina(${i})">${i}</a></li>`;
-            }
-        }
-
-        window.cambiarPagina = (p) => { paginaActual = p; renderizarPagina(); };
-        window.abrirModalNuevo = () => {
-            document.getElementById('eq-id').value = "";
-            document.getElementById('form-equipo').reset();
-            document.getElementById('modal-titulo').innerText = "Nuevo Registro Técnico";
-            modalEq.show();
-        };
-
-        window.editarEquipo = async (id) => {
-            const d = await getDoc(doc(db, "equipos", id));
-            const e = d.data();
-            document.getElementById('eq-id').value = id;
-            document.getElementById('eq-nombre').value = e.nombre || "";
-            document.getElementById('eq-modelo').value = e.modelo || "";
-            document.getElementById('eq-stock').value = e.stock || "1";
-            document.getElementById('eq-serial').value = e.serial || "";
-            document.getElementById('eq-fabricante').value = e.fabricante || "";
-            document.getElementById('eq-tipo').value = e.tipo || "Otros";
-            document.getElementById('eq-lab').value = e.laboratorio || "";
-            document.getElementById('eq-estado').value = e.estado || "Operativo";
-            document.getElementById('eq-obs').value = e.observaciones || "";
-            document.getElementById('modal-titulo').innerText = "Actualizar Ficha Técnica";
-            modalEq.show();
-        };
-
-        window.eliminarEquipo = async (id, nombre) => {
-            if(confirm(`¿Deseas eliminar ${nombre}?`)) await deleteDoc(doc(db, "equipos", id));
-        };
-
-        document.getElementById('form-equipo').onsubmit = async (ev) => {
-            ev.preventDefault();
-            const id = document.getElementById('eq-id').value;
-            const payload = {
-                adminId: currentAdminId,
-                nombre: document.getElementById('eq-nombre').value,
-                modelo: document.getElementById('eq-modelo').value,
-                stock: document.getElementById('eq-stock').value,
-                serial: document.getElementById('eq-serial').value,
-                fabricante: document.getElementById('eq-fabricante').value,
-                tipo: document.getElementById('eq-tipo').value,
-                laboratorio: document.getElementById('eq-lab').value,
-                estado: document.getElementById('eq-estado').value,
-                observaciones: document.getElementById('eq-obs').value,
-                fechaUpdate: new Date().toISOString()
-            };
-            try {
-                id ? await updateDoc(doc(db, "equipos", id), payload) : await addDoc(collection(db, "equipos"), payload);
-                modalEq.hide();
-            } catch (err) { alert("Error al guardar: " + err.message); }
-        };
-
-        document.getElementById('input-csv').onchange = async (ev) => {
-            const file = ev.target.files[0];
-            if (!file || !importarCSV) return;
-            try {
-                const total = await importarCSV(file, db, "equipos");
-                mostrarFeedback(`Importados ${total} equipos con éxito.`, 'success', 'status-container');
-            } catch (err) { mostrarFeedback(err, 'danger', 'status-container'); }
-            ev.target.value = "";
-        };
-
+        // Iniciamos Lógica
+        EquiposController.init();
     </script>
 </body>
 </html>
