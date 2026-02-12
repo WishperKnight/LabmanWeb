@@ -1,0 +1,37 @@
+name: CI/CD Lab Track
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js (Para el script de assets)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Ejecutar script de preparación de recursos
+      run: node setup-assets.js
+
+    - name: Validar integridad de archivos críticos
+      run: |
+        test -f css/bootstrap.min.css || exit 1
+        test -f css/all.min.css || exit 1
+        test -f js/bootstrap.bundle.min.js || exit 1
+        echo "✅ Todos los recursos locales están presentes."
+
+    - name: Desplegar a GitHub Pages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
