@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Reportes | Lab Track</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" href="./assets/icons/favicon.svg">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+    
+</head>
+
+<body class="bg-light">
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="container-fluid py-4">
+
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="fw-bold text-dark m-0">Historial de Reportes</h2>
+                    <p class="text-muted small m-0">Gestión y seguimiento de incidencias en laboratorio.</p>
+                </div>
+                <div class="d-flex gap-3 align-items-center">
+                    <button id="btn-nuevo-reporte" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fas fa-plus me-2"></i>Nuevo Reporte
+                    </button>
+
+                    <div class="btn-group bg-white shadow-sm p-1 rounded-pill border" id="grupo-filtros">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 filter-btn"
+                            data-filter="todos">Todos</button>
+                        <button class="btn btn-sm btn-light rounded-pill px-3 filter-btn"
+                            data-filter="abierto">Abiertos</button>
+                        <button class="btn btn-sm btn-light rounded-pill px-3 filter-btn"
+                            data-filter="cerrado">Cerrados</button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="card-premium border-0 shadow-sm bg-white rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light text-muted small fw-bold text-uppercase">
+                            <tr>
+                                <th class="ps-4 py-3">Incidencia</th>
+                                <th class="d-none d-md-table-cell">Sede</th>
+                                <th class="d-none d-sm-table-cell">Responsable</th>
+                                <th class="d-none d-lg-table-cell">Fecha</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-reportes">
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="text-muted mt-2 small">Cargando incidencias...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalReporte" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="fw-bold m-0 text-primary" id="modalTitulo">Nuevo Reporte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="form-reporte">
+                        <input type="hidden" id="edit-id">
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Título de la Incidencia</label>
+                            <input type="text" id="rep-momento" class="form-control bg-light border-0"
+                                placeholder="Ej: Falla en Centrífuga" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label small fw-bold">Laboratorio</label>
+                                <select id="rep-lab" class="form-select bg-light border-0" required>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label class="form-label small fw-bold">Técnico Asignado</label>
+                                <select id="rep-user" class="form-select bg-light border-0" required>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Descripción Detallada</label>
+                            <textarea id="rep-desc" class="form-control bg-light border-0" rows="4"
+                                placeholder="Describa el problema y los pasos tomados..." required></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light w-100 rounded-pill fw-bold"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">Guardar
+                                Reporte</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="module">
+        // Importamos el controlador
+        import { ReportesController } from './js/controllers/ReportesController.js';
+
+        // Intentamos cargar el sidebar por separado
+        // Nota: Asegúrate de que la ruta a sidebar.js sea correcta
+        import { cargarSidebar } from './js/sidebar.js';
+
+        try {
+            // Inicializar Sidebar
+            if (typeof cargarSidebar === 'function') {
+                cargarSidebar('reportes');
+            }
+
+            // Inicializar Controlador MVC
+            ReportesController.init();
+
+        } catch (error) {
+            console.error("Error al inicializar la aplicación:", error);
+        }
+    </script>
+</body>
+
+</html>

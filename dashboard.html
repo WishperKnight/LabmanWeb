@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | Lab Track</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+       <link rel="icon" href="./assets/icons/favicon.svg">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%230d6efd%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352z%22/></svg>">
+</head>
+
+<body class="bg-light">
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+    <div class="container-fluid py-4">
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark m-0">Panel de Control</h2>
+                <p class="text-muted small m-0">Sedes, Personal e Inventario en tiempo real.</p>
+            </div>
+            <div id="fecha-actual" class="badge bg-white text-primary p-2 shadow-sm border"></div>
+        </header>
+
+        <div class="row g-3 mb-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="card p-3 rounded-4 border-0 shadow-sm border-start border-primary border-4">
+                    <h2 id="count-labs" class="fw-bold m-0">0</h2>
+                    <small class="text-muted fw-bold">SEDES</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 rounded-4 border-0 shadow-sm border-start border-success border-4">
+                    <h2 id="count-materiales" class="fw-bold m-0">0</h2>
+                    <small class="text-muted fw-bold">MATERIALES</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 rounded-4 border-0 shadow-sm border-start border-danger border-4">
+                    <h2 id="count-incidencias" class="fw-bold m-0">0</h2>
+                    <small class="text-muted fw-bold">INCIDENCIAS</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card p-3 rounded-4 border-0 shadow-sm border-start border-dark border-4">
+                    <h2 id="count-users" class="fw-bold m-0">0</h2>
+                    <small class="text-muted fw-bold">PERSONAL</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-4"><i class="fas fa-map-marker-alt text-primary me-2"></i>Sedes y Responsables</h6>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="small text-muted">
+                                    <tr>
+                                        <th>LABORATORIO</th>
+                                        <th>A CARGO</th>
+                                        <th class="text-end">ESTADO</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-labs">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-4 text-danger"><i class="fas fa-tools me-2"></i>Mantenimientos Pendientes</h6>
+                        <div id="lista-incidencias" class="list-group list-group-flush">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-4 text-warning"><i class="fas fa-flask me-2"></i>Alertas de Stock (< 30%)</h6>
+                        <div id="contenedor-alertas">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { cargarSidebar } from './js/sidebar.js';
+        import { DashboardController } from './js/controllers/DashboardController.js';
+
+        cargarSidebar('dashboard');
+        document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric'});
+
+        // Iniciamos el controlador
+        DashboardController.init();
+    </script>
+</body>
+</html>

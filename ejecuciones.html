@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecuciones - Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+       <link rel="icon" href="./assets/icons/favicon.svg">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Gestión de Protocolos</h2>
+                <p class="text-muted small">Configura procedimientos base y supervisa su ejecución.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-success shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalProt">
+                    <i class="fas fa-file-medical me-2"></i>Nuevo Protocolo Base
+                </button>
+                <button class="btn btn-primary shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalEj">
+                    <i class="fas fa-play me-2"></i>Nueva Ejecución / Asignación
+                </button>
+            </div>
+        </div>
+
+        <div class="card-custom shadow-sm">
+            <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+    <span class="small fw-bold text-muted text-uppercase">Filtrar por estado:</span>
+    <div class="btn-group" role="group" id="filtroEstadoGrupo">
+        <input type="radio" class="btn-check" name="filtroEstado" id="fTodos" value="Todos" checked>
+        <label class="btn btn-sm btn-outline-secondary px-3" for="fTodos">Todos</label>
+
+        <input type="radio" class="btn-check" name="filtroEstado" id="fPendiente" value="Pendiente">
+        <label class="btn btn-sm btn-outline-warning px-3" for="fPendiente">Pendiente</label>
+
+        <input type="radio" class="btn-check" name="filtroEstado" id="fEnCurso" value="En Curso">
+        <label class="btn btn-sm btn-outline-primary px-3" for="fEnCurso">En Curso</label>
+
+        <input type="radio" class="btn-check" name="filtroEstado" id="fCompletado" value="Completado">
+        <label class="btn btn-sm btn-outline-success px-3" for="fCompletado">Completado</label>
+    </div>
+</div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Protocolo</th>
+                            <th>Técnico Responsable</th>
+                            <th>Equipos</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-ej">
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                Cargando datos de laboratorio...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEj" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+                <h5 class="fw-bold mb-4 text-primary"><i class="fas fa-tasks me-2"></i>Iniciar o Asignar Tarea</h5>
+                
+                <form id="form-ejecucion-registro">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Protocolo Base</label>
+                            <select id="ejProtocoloSel" class="form-select border-primary-subtle" required>
+                                <option value="">Cargando protocolos base...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-primary">Técnico Responsable</label>
+                            <select id="ejTecnico" class="form-select border-primary-subtle" required>
+                                <option value="">Cargando personal...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Observaciones de esta ejecución</label>
+                            <textarea id="ejDesc" class="form-control" rows="2" placeholder="Notas específicas para hoy..."></textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Estado Inicial</label>
+                            <select id="ejEstado" class="form-select">
+                                <option value="En Curso">En Curso</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Completado">Completado</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label small fw-bold mb-0">Materiales Adicionales</label>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btn-agregar-material-ej">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div id="contenedor-materiales-ej" class="border rounded p-3 bg-light-subtle shadow-inner">
+                                <p class="text-muted small text-center mb-0">Agrega insumos extra si es necesario.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mt-4 pt-3 border-top">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-primary w-100 fw-bold shadow-sm" id="btnAsignarProtocolo">
+                                <i class="fas fa-user-tag me-2"></i>Asignar Tarea
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary w-100 fw-bold shadow-sm" id="btnSaveEj">
+                                <i class="fas fa-play me-2"></i>Iniciar Registro
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalProt" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+                <h5 class="fw-bold mb-4 text-success"><i class="fas fa-file-medical me-2"></i>Definir Nuevo Protocolo Base</h5>
+                
+                <form id="form-protocolo-base">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Nombre del Protocolo</label>
+                            <input type="text" id="protNombre" class="form-control" placeholder="Ej: Extracción de ADN" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Descripción del Procedimiento</label>
+                            <textarea id="protDesc" class="form-control" rows="3" placeholder="Pasos estándar..."></textarea>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label small fw-bold mb-0 text-success">
+                                    <i class="fas fa-microscope me-2"></i>Equipos Requeridos
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-success" id="btn-agregar-equipo-base">
+                                    <i class="fas fa-plus me-1"></i> Añadir Equipo
+                                </button>
+                            </div>
+                            <div id="contenedor-equipos-base" class="border rounded p-3 bg-light-subtle">
+                                <p class="text-muted small text-center mb-0">Selecciona los equipos necesarios para este protocolo.</p>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label small fw-bold mb-0 text-success">
+                                    <i class="fas fa-boxes me-2"></i>Insumos/Fungibles Base
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-success" id="btn-agregar-material-base">
+                                    <i class="fas fa-plus me-1"></i> Añadir Insumo
+                                </button>
+                            </div>
+                            <div id="contenedor-materiales-base" class="border rounded p-3 bg-light-subtle">
+                                <p class="text-muted small text-center mb-0">Define los materiales que siempre se consumen.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mt-4 pt-3 border-top">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-success w-100 fw-bold shadow-sm" id="btnGuardarProtBase">
+                                <i class="fas fa-save me-2"></i>Guardar Protocolo
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        import { cargarSidebar } from './js/sidebar.js';
+        import { EjecucionController } from './js/controllers/EjecucionesController.js';
+        
+        cargarSidebar('ejecuciones');
+        EjecucionController.init();
+    </script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

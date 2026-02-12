@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios | Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+       <link rel="icon" href="./assets/icons/favicon.svg">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+</head>
+<body class="bg-light">
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="container-fluid">
+            <header class="mb-5 mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-dark m-0">Administración de Usuarios</h2>
+                        <p class="text-muted small m-0">Control de acceso y roles para tu personal de laboratorio.</p>
+                    </div>
+                    <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
+                        <i class="fas fa-user-plus me-2"></i>Añadir Usuario
+                    </button>
+                </div>
+
+                <div class="row g-3 bg-white p-3 rounded-4 shadow-sm border">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" id="busqueda-usuario" class="form-control bg-light border-0" placeholder="Buscar por nombre o correo...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="filtro-rol" class="form-select bg-light border-0">
+                            <option value="todos">Todos los roles</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="usuario">Usuario (Consulta)</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <div class="card-premium border-0 shadow-sm bg-white rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light text-muted small fw-bold text-uppercase">
+                            <tr>
+                                <th class="ps-4">Identidad</th>
+                                <th>Rol de Acceso</th>
+                                <th>Laboratorio Principal</th>
+                                <th class="text-end pe-4">Gestión</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-usuarios">
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-2 text-muted">Sincronizando equipo...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="fw-bold m-0 text-primary"><i class="fas fa-user-shield me-2"></i>Alta de Personal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="form-nuevo-usuario">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nombre Completo</label>
+                            <input type="text" id="nuevo-nombre" class="form-control bg-light border-0 rounded-3" placeholder="Ej: Dr. Julian Garcia" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Correo Institucional</label>
+                            <input type="email" id="nuevo-email" class="form-control bg-light border-0 rounded-3" placeholder="email@laboratorio.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nivel de Acceso</label>
+                            <select id="nuevo-rol" class="form-select bg-light border-0 rounded-3" required>
+                                <option value="usuario">Usuario (Solo lectura)</option>
+                                <option value="tecnico" selected>Técnico (Gestión de stocks)</option>
+                                <option value="Supervisor">Supervisor (Control total)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
+                            Vincular a mi Panel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalRol" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="fw-bold m-0">Editar Permisos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <input type="hidden" id="user-id-rol">
+                    <div class="avatar-circle mx-auto mb-3" id="user-avatar-placeholder" style="width: 60px; height: 60px; font-size: 24px;"></div>
+                    <p class="small text-muted mb-3">Cambiar rol para:<br><b id="user-nombre-rol" class="text-dark"></b></p>
+                    <select id="select-nuevo-rol" class="form-select border-0 bg-light rounded-3 text-center">
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="usuario">Usuario</option>
+                    </select>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button onclick="AdminController.guardarNuevoRol()" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Actualizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="fw-bold m-0"><i class="fas fa-lock me-2 text-warning"></i>Nueva Clave</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="pass-user-id">
+                <p class="small text-muted mb-3">Establecer contraseña para:<br><b id="pass-user-nombre" class="text-dark"></b></p>
+                <div class="input-group bg-light rounded-3">
+                    <span class="input-group-text border-0 bg-transparent"><i class="fas fa-eye-slash text-muted"></i></span>
+                    <input type="text" id="nueva-password-input" class="form-control border-0 bg-transparent" placeholder="Escribe la clave...">
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button onclick="AdminController.guardarNuevaPassword()" class="btn btn-warning w-100 rounded-pill py-2 fw-bold shadow-sm">
+                    Confirmar Cambio
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        import { cargarSidebar } from './js/sidebar.js';
+        import { AdminController } from './js/controllers/AdminController.js';
+
+        // Carga el sidebar y marca como activa la opción 'usuarios'
+        cargarSidebar('usuarios');
+        
+        // Inicia el controlador de administración
+        AdminController.init();
+    </script>
+</body>
+</html>

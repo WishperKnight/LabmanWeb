@@ -1,0 +1,187 @@
+:root {
+    --sidebar-bg: #1a1d23;
+    --sidebar-hover: #2d323e;
+    --primary-blue: #0d6efd;
+    --accent-purple: #5d5fef;
+}
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: #f8f9fa; 
+    margin: 0;
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.main { 
+    margin-left: 260px; 
+    padding: 20px;
+    transition: all 0.3s ease;
+    min-height: 100vh;
+}
+/* --- CIRCULO DEL AVATAR DEL TECNICO ---*/
+.avatar-circle {
+    width: 38px;
+    height: 38px;
+    background: #f0f2f5;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+/* --- SIDEBAR ESTILO OSCURO --- */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    top: 0; 
+    left: 0;
+    background-color: var(--sidebar-bg) !important;
+    color: white;
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .nav-link {
+    color: #8a8d93 !important;
+    padding: 12px 20px;
+    margin: 4px 15px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--sidebar-hover);
+    color: white !important;
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--accent-purple) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(93, 95, 239, 0.3);
+}
+
+/* --- TARJETAS (STAT CARDS) --- */
+.stat-card-premium {
+    background: white;
+    border: none;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 100%;
+}
+
+.icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.card-blue .icon-box { background: #eef2ff; color: #4e73df; }
+.card-green .icon-box { background: #f0fff4; color: #2ecc71; }
+.card-red .icon-box { background: #fff5f5; color: #e74c3c; }
+.card-dark .icon-box { background: #f8f9fa; color: #343a40; }
+
+/* --- AJUSTE MÓVIL (EL PARCHE CLAVE) --- */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100% !important;
+        height: 0; /* Oculto por defecto */
+        position: fixed;
+        top: 56px; /* Debajo de la navbar azul */
+        left: 0;
+        overflow: hidden;
+        transition: height 0.3s ease;
+    }
+
+    /* Cuando Bootstrap añade la clase .show al abrir la hamburguesa */
+    .sidebar.show {
+        height: calc(100vh - 56px);
+        display: block !important;
+    }
+
+    .main { 
+        margin-left: 0 !important; 
+        padding-top: 80px; /* Espacio para la navbar fija */
+    }
+
+    .sidebar .nav-link {
+        margin: 10px 20px;
+    }
+}
+/* Estilos específicos para la tabla de inventario */
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #edf2f7;
+    color: #718096;
+    font-size: 0.75rem;
+    padding: 15px;
+}
+
+.table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 0.9rem;
+}
+
+.badge {
+    font-weight: 600;
+    padding: 0.5em 1em;
+}
+
+/* Efecto hover en las filas */
+.table tbody tr:hover {
+    background-color: #fcfdff;
+    transition: background-color 0.2s ease;
+}
+
+/* Colores suaves para los inputs del modal */
+.bg-primary-subtle { background-color: #eef2ff !important; }
+.bg-info-subtle { background-color: #e0f7fa !important; }
+/* Indicadores de Stock por Porcentaje */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.status-critical { 
+    background-color: #ef4444; 
+    box-shadow: 0 0 8px #ef4444;
+    animation: pulse-red 2s infinite; 
+}
+
+.status-warning { background-color: #f59e0b; } /* Naranja para el 30-40% */
+.status-ok { background-color: #10b981; }
+
+@keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+/* Asegura que la tabla no rompa el layout */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* En móviles, el main suele necesitar un padding extra para no quedar debajo del navbar móvil */
+@media (max-width: 768px) {
+    .main {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        width: 100%;
+    }
+}

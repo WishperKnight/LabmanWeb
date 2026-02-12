@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorios | Lab Track</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+       <link rel="icon" href="./assets/icons/favicon.svg">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+    <style>
+        .card-premium { border-radius: 1.2rem; background: white; transition: 0.3s; border: none; }
+        .card-premium:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+        .icon-box-lg { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .modal-content { border-radius: 1.5rem; border: none; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="container-fluid py-4">
+            
+            <header class="d-flex justify-content-between align-items-center mb-5 mt-2">
+                <div>
+                    <h2 class="fw-bold text-dark m-0">Unidades de Laboratorio</h2>
+                    <p class="text-muted small m-0">Gestión de sedes, responsables y capacidad.</p>
+                </div>
+                <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" id="btn-nueva-unidad">
+                    <i class="fas fa-plus me-2"></i>Nueva Unidad
+                </button>
+            </header>
+
+            <div class="row g-4" id="contenedor-laboratorios">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Cargando unidades...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalLab" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="fw-bold m-0 text-primary" id="modal-titulo">Registrar Unidad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="form-lab">
+                    <input type="hidden" id="lab-id">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Nombre del Laboratorio</label>
+                                <input type="text" id="lab-nombre" class="form-control bg-light border-0" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Responsable</label>
+                                <select id="lab-responsable" class="form-select bg-light border-0" required></select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">Ubicación</label>
+                                <input type="text" id="lab-ubicacion" class="form-control bg-light border-0">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Cupo</label>
+                                <input type="number" id="lab-capacidad" class="form-control bg-light border-0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalVerEquipos" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="fw-bold m-0 text-dark">Inventario en sede</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light small fw-bold text-uppercase">
+                            <tr>
+                                <th class="ps-4 py-3">Equipo</th>
+                                <th>Estado</th>
+                                <th class="pe-4 text-end">Serial</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-equipos-lab"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <script type="module">
+    import { LaboratorioController } from './js/controllers/LaboratorioController.js';
+    import { cargarSidebar } from './js/sidebar.js';
+
+    // Función de inicio seguro
+    const iniciarApp = () => {
+        try {
+            cargarSidebar('laboratorios');
+            
+            if (LaboratorioController) {
+                LaboratorioController.init();
+                console.log("✅ Controlador de Laboratorios iniciado");
+            }
+        } catch (error) {
+            console.error("❌ Error al inicializar:", error);
+            // Si hay error, quitamos el spinner para no engañar al usuario
+            const contenedor = document.getElementById('contenedor-laboratorios');
+            if (contenedor) contenedor.innerHTML = `<p class="text-danger text-center">Error al conectar con la base de datos.</p>`;
+        }
+    };
+
+    // Ejecutar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', iniciarApp);
+    } else {
+        iniciarApp();
+    }
+</script>
+<script src="./js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
