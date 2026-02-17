@@ -1,0 +1,12 @@
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar carpetas de dependencias (si usaras npm)
+node_modules/
+
+# Ignorar el script de setup si no quieres que otros lo corran
+# setup-assets.js 
+
+# Archivos de configuración local con llaves privadas
+.env
