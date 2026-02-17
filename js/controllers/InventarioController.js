@@ -29,7 +29,7 @@ export const InventarioController = {
             const coincideBusqueda = nombre.includes(terminoBusqueda) || lote.includes(terminoBusqueda);
             return coincideTipo && coincideBusqueda;
         });
-        
+
         InventarioView.renderizarTabla(filtrados, this.tipoFiltro);
     },
 
@@ -40,13 +40,19 @@ export const InventarioController = {
         });
 
         // 2. Cambio de Tabs (Reactivos / Fungibles)
-        document.getElementById('tab-reactivos').onclick = () => {
+        const tabReactivos = document.getElementById('tab-reactivos');
+        const tabFungibles = document.getElementById('tab-fungibles');
+
+        tabReactivos.onclick = () => {
             this.tipoFiltro = 'reactivo';
+            this.actualizarEstadoTabs(tabReactivos, tabFungibles); // Cambia el aspecto visual
             this.refrescarUI();
-            InventarioView.toggleCampos('reactivo'); // Asegura que el modal cambie también
+            InventarioView.toggleCampos('reactivo');
         };
-        document.getElementById('tab-fungibles').onclick = () => {
+
+        tabFungibles.onclick = () => {
             this.tipoFiltro = 'fungible';
+            this.actualizarEstadoTabs(tabFungibles, tabReactivos); // Cambia el aspecto visual
             this.refrescarUI();
             InventarioView.toggleCampos('fungible');
         };
@@ -63,18 +69,21 @@ export const InventarioController = {
         document.getElementById('form-articulo').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('art-id').value;
-            
+
             const data = {
                 adminId: auth.currentUser.uid,
                 nombre: document.getElementById('art-nombre').value,
                 tipo: document.getElementById('art-tipo').value,
                 marca_fabricante: document.getElementById('art-marca').value,
-                cantidad_unidades: Number(document.getElementById('art-stock').value), // Es el %
+                cantidad_unidades: Number(document.getElementById('art-stock').value), // Porcentaje
+                capacidad_total: document.getElementById('art-stockTotal').value, // Nuevo
                 riqueza: document.getElementById('art-riqueza').value,
                 molaridad: document.getElementById('art-molaridad').value,
-                capacidad: document.getElementById('art-capacidad').value,
+                capacidad_especifica: document.getElementById('art-capacidad').value, // Para fungibles
                 lote: document.getElementById('art-lote').value,
-                caducidad: document.getElementById('art-caducidad').value
+                fecha_recepcion: document.getElementById('art-recepcion').value, // Nuevo
+                caducidad: document.getElementById('art-caducidad').value,
+                laboratorio: document.getElementById('art-laboratorio').value // Nuevo
             };
 
             await InventarioModel.guardar(data, id);
@@ -106,18 +115,31 @@ export const InventarioController = {
     },
 
     cargarDatosEnModal(item) {
-        document.getElementById('art-id').value = item.id;
-        document.getElementById('art-nombre').value = item.nombre;
-        document.getElementById('art-tipo').value = item.tipo;
+        document.getElementById('art-id').value = item.id || "";
+        document.getElementById('art-nombre').value = item.nombre || "";
+        document.getElementById('art-tipo').value = item.tipo || "reactivo";
         document.getElementById('art-marca').value = item.marca_fabricante || "";
         document.getElementById('art-stock').value = item.cantidad_unidades || 0;
+        document.getElementById('art-stockTotal').value = item.capacidad_total || "";
         document.getElementById('art-riqueza').value = item.riqueza || "";
         document.getElementById('art-molaridad').value = item.molaridad || "";
-        document.getElementById('art-capacidad').value = item.capacidad || "";
+        document.getElementById('art-capacidad').value = item.capacidad_especifica || "";
         document.getElementById('art-lote').value = item.lote || "";
+        document.getElementById('art-recepcion').value = item.fecha_recepcion || "";
         document.getElementById('art-caducidad').value = item.caducidad || "";
+        document.getElementById('art-laboratorio').value = item.laboratorio || "";
 
         InventarioView.toggleCampos(item.tipo);
-        new bootstrap.Modal(document.getElementById('modalArticulo')).show();
+        const modal = new bootstrap.Modal(document.getElementById('modalArticulo'));
+        modal.show();
+    },
+    actualizarEstadoTabs(tabActiva, tabInactiva) {
+        // Añade la clase active al seleccionado y la quita del otro
+        tabActiva.classList.add('active');
+        tabInactiva.classList.remove('active');
+
+        // Opcional: Si usas accesibilidad (aria-selected)
+        tabActiva.setAttribute('aria-selected', 'true');
+        tabInactiva.setAttribute('aria-selected', 'false');
     }
 };
