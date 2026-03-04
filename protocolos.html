@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolos - Lab Track</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%233b82f6%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352zM134 320c-18.78 0-34-15.22-34-34s15.22-34 34-34 34 15.22 34 34-15.22 34-34 34z%22/></svg>">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+</head>
+<body>
+
+    <div id="sidebar-container"></div>
+
+    <div class="main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Protocolos Técnicos</h2>
+                <p class="text-muted small">Definición de PNT y guías de laboratorio.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary shadow-sm px-4" id="btn-nuevo-protocolo">
+                    <i class="fas fa-plus me-2"></i>Nuevo Protocolo
+                </button>
+            </div>
+        </div>
+
+        <div class="card-custom shadow-sm">
+            <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+                <span class="small fw-bold text-muted text-uppercase">Listado de Procedimientos</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Nombre del Protocolo</th>
+                            <th>Categoría</th>
+                            <th>Fecha Registro</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contenedor-protocolos">
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                Cargando protocolos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+ <div class="modal fade" id="modalProtocolo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 p-4 shadow-lg">
+            <h5 class="fw-bold mb-4 text-primary" id="modal-titulo">
+                <i class="fas fa-flask me-2"></i>Configurar Protocolo
+            </h5>
+            
+            <form id="form-protocolo">
+                <input type="hidden" id="prot-id">
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label class="form-label small fw-bold">Nombre del Protocolo (PCR, etc.)</label>
+                        <input type="text" id="prot-nombre" class="form-control" required>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small fw-bold m-0"><i class="fas fa-microscope me-1"></i> Equipos requeridos</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-equipo">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="lista-equipos-input" class="bg-light p-3 rounded-3 border">
+                            </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Procedimiento (Pasos detallados)</label>
+                        <textarea id="prot-procedimiento" class="form-control" rows="4" placeholder="1. Preparar... 2. Mezclar..."></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small fw-bold m-0"><i class="fas fa-vial me-1"></i> Materiales e Insumos (Fungibles)</label>
+                            <button type="button" class="btn btn-sm btn-outline-success" id="btn-add-fungible">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="lista-fungibles-input" class="bg-light p-3 rounded-3 border">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-4 pt-3 border-top">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Guardar Cambios</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVerDetalles" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Vista Previa de Protocolo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body bg-light" id="area-impresion">
+                <div class="p-5 bg-white shadow-sm mx-auto" style="max-width: 800px; min-height: 500px;">
+                    <div class="d-flex justify-content-between align-items-start border-bottom border-3 border-primary pb-3 mb-4">
+                        <div>
+                            <h2 class="fw-bold text-primary mb-0" id="view-nombre">NOMBRE DEL PROTOCOLO</h2>
+                            <p class="text-muted small mb-0">Procedimiento Normalizado de Trabajo (PNT)</p>
+                        </div>
+                        <div class="text-end small">
+                            <div class="fw-bold">LAB TRACKER</div>
+                            <div id="view-fecha" class="text-muted"></div>
+                            <div id="view-admin" class="extra-small text-muted"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-uppercase fw-bold text-secondary small border-bottom pb-1">1. Equipamiento Requerido</h6>
+                        <div id="view-equipo" class="py-2"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-uppercase fw-bold text-secondary small border-bottom pb-1">2. Insumos y Fungibles</h6>
+                        <div id="view-materiales-lista" class="py-2"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-uppercase fw-bold text-secondary small border-bottom pb-1">3. Metodología y Procedimiento</h6>
+                        <div id="view-procedimiento" class="py-2 lh-lg" style="white-space: pre-wrap; font-size: 0.95rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-white">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" onclick="ProtocoloController.exportarPDF()">
+                    <i class="fas fa-file-pdf me-2"></i>Descargar como PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module">
+    import { cargarSidebar } from './js/sidebar.js';
+    import { ProtocoloController } from './js/controllers/protocoloController.js';
+        
+        // Carga el sidebar igual que en ejecuciones.html
+        cargarSidebar('protocolos');
+        
+        // Inicializa el controlador
+        if (ProtocoloController) {
+            ProtocoloController.init();
+        }
+
+        // Abrir modal nuevo
+        document.getElementById('btn-nuevo-protocolo').addEventListener('click', () => {
+            document.getElementById('form-protocolo').reset();
+            document.getElementById('prot-id').value = '';
+            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-plus me-2"></i>Registrar Nuevo Protocolo';
+            new bootstrap.Modal(document.getElementById('modalProtocolo')).show();
+        });
+
+        // Lógica de PDF
+        document.getElementById('btn-pdf').addEventListener('click', async () => {
+            const { jsPDF } = window.jspdf;
+            const area = document.getElementById('area-impresion');
+            const titulo = document.getElementById('detalle-titulo').innerText;
+            
+            const canvas = await html2canvas(area, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+            pdf.save(`Protocolo_${titulo}.pdf`);
+        });
+
+        // Manejar el envío del formulario (Crear o Editar)
+    document.getElementById('form-protocolo').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const datos = {
+            titulo: document.getElementById('prot-titulo').value,
+            categoria: document.getElementById('prot-categoria').value,
+            descripcion: document.getElementById('prot-descripcion').value
+        };
+
+        const idExistente = document.getElementById('prot-id').value;
+
+        try {
+            if (idExistente) {
+                await ProtocoloController.actualizarProtocolo(idExistente, datos);
+            } else {
+                await ProtocoloController.crearProtocolo(datos);
+            }
+            
+            // Cerrar modal y limpiar
+            bootstrap.Modal.getInstance(document.getElementById('modalProtocolo')).hide();
+            await ProtocoloController.init(); // Recargar tabla
+        } catch (error) {
+            alert("Error al guardar el protocolo: " + error.message);
+        }
+    });
+    </script>
+</body>
+</html>

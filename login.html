@@ -11,19 +11,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-       <link rel="icon" href="./assets/icons/favicon.svg">
-    <link rel="stylesheet" href="./css/bootstrap.min.css">
-    <link rel="stylesheet" href="./css/all.min.css">
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22><path fill=%22%230d6efd%22 d=%22M352 320c-23.03 0-44.42 8.35-61.1 22.06l-67.9-20.94c4.6-11.41 7-23.59 7-36.12 0-53.02-42.98-96-96-96s-96 42.98-96 96 42.98 96 96 96c8.48 0 16.63-1.11 24.39-3.18l67.35 20.77C226.04 443.34 224 447.45 224 452c0 33.14 26.86 60 60 60h168c33.14 0 60-26.86 60-60v-72c0-33.14-26.86-60-60-60H352z%22/></svg>">
-
     <style>
         body { font-family: 'Inter', sans-serif; background: #f4f7f9; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
         .login-card { max-width: 420px; width: 100%; border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #ffffff; }
         .brand-logo { width: 64px; height: 64px; background: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin: 0 auto 1.5rem; font-size: 1.8rem; }
-        .form-control { padding: 0.75rem 1rem; border-radius: 10px; }
+        .form-control { padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #dee2e6; }
         .btn-primary { padding: 0.8rem; border-radius: 10px; font-weight: 700; transition: all 0.3s; }
-        .input-group-text { cursor: pointer; border-radius: 0 10px 10px 0; }
+        .input-group-text { cursor: pointer; border-radius: 0 10px 10px 0; background: #f8f9fa; }
+        .forgot-password-link { font-size: 0.85rem; color: #0d6efd; text-decoration: none; font-weight: 600; }
+        .forgot-password-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -49,7 +46,10 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label small fw-bold text-secondary text-uppercase">Contraseña</label>
+                    <div class="d-flex justify-content-between">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Contraseña</label>
+                        <a href="#" class="forgot-password-link" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">¿Olvidaste tu contraseña?</a>
+                    </div>
                     <div class="input-group">
                         <input type="password" class="form-control bg-light" id="password" placeholder="••••••••" required>
                         <span class="input-group-text bg-light text-muted" id="btn-toggle-pass">
@@ -73,34 +73,86 @@
         </div>
     </div>
 
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-key fa-3x text-primary mb-3"></i>
+                        <h4 class="fw-bold">Recuperar Acceso</h4>
+                        <p class="text-muted small">Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+                    </div>
+                    <form id="reset-password-form">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary text-uppercase">Correo de recuperación</label>
+                            <input type="email" class="form-control bg-light" id="reset-email" placeholder="tu-correo@ejemplo.com" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="btn-reset">ENVIAR ENLACE</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
-       import { intentarLogin, manejarErrorAuth } from './js/controllers/authController.js';
-        import { ui } from './js/views/uiView.js'; // Asumiendo que aquí tienes mostrarError y mostrarCarga
+        import { intentarLogin, manejarErrorAuth, enviarCorreoRecuperacion } from './js/controllers/authController.js';
+        import { ui } from './js/views/uiView.js';
 
         const loginForm = document.getElementById('login-form');
+        const resetForm = document.getElementById('reset-password-form');
+        const passInput = document.getElementById('password');
+        const btnTogglePass = document.getElementById('btn-toggle-pass');
+        const eyeIcon = document.getElementById('eye-icon');
 
+        // Alternar Ver Contraseña
+        btnTogglePass.addEventListener('click', () => {
+            const type = passInput.type === 'password' ? 'text' : 'password';
+            passInput.type = type;
+            eyeIcon.classList.toggle('fa-eye');
+            eyeIcon.classList.toggle('fa-eye-slash');
+        });
+
+        // Lógica de Login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // 1. Mostrar estado de carga (Feedback visual)
-           ui.setLoading(true); 
+            ui.setLoading(true); 
+            try {
+                await intentarLogin(email, password);
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                const mensaje = manejarErrorAuth(error.code);
+                ui.mostrarError(mensaje); 
+            } finally {
+                ui.setLoading(false); 
+            }
+        });
 
-        try {
-            await intentarLogin(email, password);
-            window.location.href = 'dashboard.html';
-        } catch (error) {
-            const mensaje = manejarErrorAuth(error.code);
-            // 2. Aquí ya usas mostrarError que sí existe en tu objeto
-            ui.mostrarError(mensaje); 
-        } finally {
-            // 3. Cambia mostrarCarga por setLoading
-            ui.setLoading(false); 
-        }
-                });
+        // Lógica de Recuperación de Contraseña
+        resetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reset-email').value;
+            
+            ui.setLoading(true);
+            try {
+                await enviarCorreoRecuperacion(email);
+                alert('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
+                // Cerrar el modal
+                bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+            } catch (error) {
+                alert(manejarErrorAuth(error.code));
+            } finally {
+                ui.setLoading(false);
+            }
+        });
     </script>
-    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

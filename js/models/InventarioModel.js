@@ -1,11 +1,12 @@
 import { db } from '../config/firebase-config.js';
 import { 
     collection, query, where, onSnapshot, doc, 
-    updateDoc, addDoc, deleteDoc, getDoc 
+    updateDoc, addDoc, deleteDoc, getDoc, getDocs, orderBy 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 export const InventarioModel = {
-    // Cambiamos el nombre para que coincida con tu controlador
+    
+    // Suscripción en tiempo real al inventario del usuario
     suscribirseAInventario(userId, callback) {
         const q = query(collection(db, "inventario"), where("adminId", "==", userId));
         return onSnapshot(q, (snapshot) => {
@@ -14,6 +15,22 @@ export const InventarioModel = {
         });
     },
 
+    // Obtener SOLO los laboratorios que pertenecen al adminId
+   // InventarioModel.js
+async obtenerLaboratorios(userId) {
+    try {
+        const q = query(
+            collection(db, "laboratorios"), 
+            where("adminId", "==", userId)
+            // Quita el orderBy("nombre", "asc") por ahora si no quieres crear el índice
+        );
+        return await getDocs(q);
+    } catch (error) {
+        throw error;
+    }
+},
+
+    // Guardar o actualizar registro de inventario
     async guardar(data, id = null) {
         if (id) {
             return await updateDoc(doc(db, "inventario", id), data);
@@ -22,10 +39,12 @@ export const InventarioModel = {
         }
     },
 
+    // Eliminar registro
     async eliminar(id) {
         return await deleteDoc(doc(db, "inventario", id));
     },
 
+    // Obtener un solo artículo por su ID
     async obtenerPorId(id) {
         const docRef = doc(db, "inventario", id);
         const docSnap = await getDoc(docRef);

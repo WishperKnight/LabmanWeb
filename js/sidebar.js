@@ -56,6 +56,11 @@ export function cargarSidebar(paginaActiva) {
                         <i class="fas fa-vial-circle-check me-2"></i> Ejecuciones
                     </a>
                 </li>
+                <li class="nav-item mb-2">
+                    <a class="nav-link rounded-3 ${paginaActiva === 'protocolos' ? 'active shadow-sm' : 'text-secondary'}" href="protocolos.html">
+                       <i class="fa-solid fa-book"></i>  Protocolos
+                    </a>
+                </li>
                 <li class="nav-item mb-2 mt-3">
                     <p class="text-uppercase text-primary extra-small fw-bold px-3 mb-2" style="letter-spacing: 1px; font-size: 0.7rem;">
                         Sistema

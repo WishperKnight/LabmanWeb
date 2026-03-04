@@ -14,77 +14,97 @@ export const LaboratorioController = {
     },
 
     async escucharCambios(adminId) {
+        const contenedor = document.getElementById('contenedor-laboratorios');
+        if (!contenedor) return;
+
         LaboratorioModel.suscribirLaboratorios(adminId, async (snap) => {
-            const contenedor = document.getElementById('contenedor-laboratorios');
-            if (!contenedor) return;
-            
-            contenedor.innerHTML = ''; 
+            try {
+                // 1. Mapeamos los documentos a promesas de datos + conteo
+                const promesasCarga = snap.docs.map(async (doc) => {
+                    const data = doc.data();
+                    const id = doc.id;
+                    
+                    // Consultamos el conteo de equipos para este laboratorio específico
+                    const numEquipos = await LaboratorioModel.getCountEquipos(data.nombre, adminId);
+                    
+                    return { id, data, numEquipos };
+                });
 
-            if (snap.empty) {
-                contenedor.innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No hay unidades registradas.</p>
+                // 2. Esperamos a que TODAS las consultas de conteo terminen
+                const resultados = await Promise.all(promesasCarga);
+
+                // 3. RECIÉN AQUÍ limpiamos y dibujamos (evita parpadeos blancos largos)
+                contenedor.innerHTML = ""; 
+
+                if (resultados.length === 0) {
+                    contenedor.innerHTML = `<div class="col-12 text-center text-muted py-5">
+                        <i class="fas fa-flask fa-3x mb-3"></i><p>No hay laboratorios registrados.</p>
                     </div>`;
-                return;
-            }
+                    return;
+                }
 
-            for (const doc of snap.docs) {
-                const data = doc.data();
-                const id = doc.id;
-                const numEquipos = await LaboratorioModel.getCountEquipos(data.nombre, adminId);
-                this.dibujarTarjeta(id, data, numEquipos);
+                resultados.forEach(res => {
+                    this.dibujarTarjeta(res.id, res.data, res.numEquipos);
+                });
+
+                // Re-vincular eventos si tus botones (editar/eliminar) los necesitan
+                this.vincularEventosTarjetas();
+
+            } catch (error) {
+                console.error("Error al procesar cambios en laboratorios:", error);
             }
         });
     },
 
     dibujarTarjeta(id, data, numEquipos) {
-        const contenedor = document.getElementById('contenedor-laboratorios');
-        const infoString = JSON.stringify(data).replace(/'/g, "&apos;");
+    const contenedor = document.getElementById('contenedor-laboratorios');
+    const infoString = JSON.stringify(data).replace(/'/g, "&apos;");
+    
+    // Validación de seguridad: si numEquipos no viene, intentamos sacarlo de data
+    const totalEquipos = numEquipos || (data.equipoBase ? data.equipoBase.length : 0);
 
-        contenedor.innerHTML += `
-            <div class="col-md-4 mb-4">
-                <div class="card card-premium shadow-sm border-0 p-3 h-100">
-                    <div class="d-flex align-items-start justify-content-between mb-3">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-box-lg bg-primary-subtle text-primary me-3">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold m-0 text-dark">${data.nombre || 'Sin nombre'}</h6>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${data.ubicacion || 'N/A'}</small>
-                            </div>
+    contenedor.innerHTML += `
+        <div class="col-md-4 mb-4">
+            <div class="card card-premium shadow-sm border-0 p-3 h-100">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box-lg bg-primary-subtle text-primary me-3">
+                            <i class="fas fa-flask"></i>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item btn-editar" href="#" data-id="${id}" data-info='${infoString}'><i class="fas fa-edit me-2"></i>Editar</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger btn-eliminar" href="#" data-id="${id}" data-nombre="${data.nombre}"><i class="fas fa-trash me-2"></i>Eliminar</a></li>
-                            </ul>
+                        <div>
+                            <h6 class="fw-bold m-0 text-dark">${data.nombre || 'Sin nombre'}</h6>
+                            <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${data.ubicacion || 'N/A'}</small>
                         </div>
                     </div>
-                    
-                    <div class="bg-light rounded-3 p-3 mb-3">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="small text-muted">Responsable:</span>
-                            <span class="small fw-bold">${data.responsable || 'No asignado'}</span>
-                        </div>
-                        <div class="d-flex justify-content-between border-top pt-2 mt-2">
-                            <span class="small text-muted font-bold">Equipos vinculados:</span>
-                            <span class="badge bg-primary rounded-pill">${numEquipos} unidades</span>
-                        </div>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><a class="dropdown-item btn-editar" href="#" data-id="${id}" data-info='${infoString}'><i class="fas fa-edit me-2"></i>Editar</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger btn-eliminar" href="#" data-id="${id}" data-nombre="${data.nombre}"><i class="fas fa-trash me-2"></i>Eliminar</a></li>
+                        </ul>
                     </div>
-
-                    <button class="btn btn-outline-primary w-100 rounded-pill btn-sm fw-bold btn-ver-inventario" data-nombre="${data.nombre}">
-                        <i class="fas fa-list-check me-2"></i>Ver Detalles de Equipos
-                    </button>
                 </div>
-            </div>`;
-    },
+                
+                <div class="bg-light rounded-3 p-3 mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="small text-muted">Responsable:</span>
+                        <span class="small fw-bold">${data.responsable || 'No asignado'}</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                        <span class="small text-muted font-bold">Equipos vinculados:</span>
+                        <span class="badge bg-primary rounded-pill">${totalEquipos} unidades</span>
+                    </div>
+                </div>
 
+                <button class="btn btn-outline-primary w-100 rounded-pill btn-sm fw-bold btn-ver-inventario" data-nombre="${data.nombre}">
+                    <i class="fas fa-list-check me-2"></i>Ver Detalles de Equipos
+                </button>
+            </div>
+        </div>`;
+},
     configurarEventos() {
         document.getElementById('btn-nueva-unidad')?.addEventListener('click', () => this.prepararModal());
 
@@ -128,8 +148,7 @@ export const LaboratorioController = {
                 }
             }
         });
-    }, // <-- Aquí faltaba cerrar la función configurarEventos
-
+    },
     async prepararModal(id = "", lab = {}) {
         const form = document.getElementById('form-lab');
         form.reset();
@@ -156,19 +175,57 @@ export const LaboratorioController = {
     },
 
     renderizarEquiposModal(snapshot) {
-        const tabla = document.getElementById('lista-equipos-lab');
-        if (!tabla) return;
-        tabla.innerHTML = snapshot.empty ? 
-            '<tr><td colspan="3" class="text-center py-3">No hay equipos asociados.</td></tr>' : '';
+    const tabla = document.getElementById('lista-equipos-lab');
+    const estadoVacio = document.getElementById('estado-vacio-equipos');
+    if (!tabla) return;
 
-        snapshot.forEach(doc => {
-            const eq = doc.data();
-            tabla.innerHTML += `
-                <tr>
-                    <td class="ps-4"><strong>${eq.nombre}</strong><br><small>${eq.marca || 'N/A'}</small></td>
-                    <td><span class="badge ${eq.estado === 'Operativo' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill">${eq.estado}</span></td>
-                    <td class="pe-4 text-end small">${eq.serial || 'S/N'}</td>
-                </tr>`;
-        });
+    // 1. Manejo de estado vacío
+    if (snapshot.empty) {
+        tabla.innerHTML = '';
+        if (estadoVacio) estadoVacio.classList.remove('d-none');
+        return;
     }
+
+    if (estadoVacio) estadoVacio.classList.add('d-none');
+
+    // 2. Construcción eficiente del HTML
+    const filasHTML = snapshot.docs.map(doc => {
+        const eq = doc.data();
+        
+        // Lógica de colores para el estado
+        const badgeClass = eq.estado === 'Operativo' 
+            ? 'bg-success-subtle text-success border-success' 
+            : 'bg-danger-subtle text-danger border-danger';
+
+        return `
+            <tr>
+                <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light rounded p-2 me-3 text-primary shadow-sm" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-tools small"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark mb-0">${eq.nombre}</div>
+                            <small class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                ${eq.marca || 'Genérico'} ${eq.modelo ? '• ' + eq.modelo : ''}
+                            </small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge rounded-pill ${badgeClass} border px-3" style="font-weight: 600; font-size: 0.75rem;">
+                        <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> ${eq.estado}
+                    </span>
+                </td>
+                <td class="pe-4 text-end">
+                    <span class="font-monospace text-secondary small bg-light px-2 py-1 rounded border">
+                        ${eq.serial || 'S/N'}
+                    </span>
+                </td>
+            </tr>`;
+    }).join('');
+
+    // 3. Inyección única al DOM
+    tabla.innerHTML = filasHTML;
+}
 };
