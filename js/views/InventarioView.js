@@ -1,94 +1,92 @@
+// InventarioView.js
 export const InventarioView = {
-
-    renderizarTabla(items, tipoActual) {
-        const header = document.getElementById('encabezados-tabla');
+    // InventarioView.js
+    renderizarTabla(items, tipoFiltro) {
         const tbody = document.getElementById('lista-materiales');
+        const thead = document.getElementById('encabezados-tabla');
+        if (!tbody || !thead) return;
 
-        // 1. Cabeceras Dinámicas basadas en tu captura de base de datos
-        header.innerHTML = `
-            <th class="ps-4">Producto / Marca</th>
-            <th>Stock (%)</th>
-            ${tipoActual === 'reactivo' ? 
-                '<th>Riqueza</th><th>Molaridad</th>' : 
-                '<th>Capacidad</th>'
-            }
-            <th>Lote / Caducidad</th>
-            <th class="text-end pe-4">Acciones</th>
-        `;
+        // 1. Definir encabezados según el tipo
+        if (tipoFiltro === 'fungible') {
+            thead.innerHTML = `
+                <th class="ps-4 py-3">Equipo / Material</th>
+                <th>Stock Disponible</th>
+                <th>Laboratorio</th>
+                <th>Marca/Modelo</th>
+                <th>Capacidad</th>
+                <th class="pe-4 text-end">Acciones</th>
+            `;
+        } else {
+            thead.innerHTML = `
+                <th class="ps-4 py-3">Reactivo</th>
+                <th>Nivel de Stock</th>
+                <th>Ubicación</th>
+                <th>Lote</th>
+                <th>Caducidad</th>
+                <th class="pe-4 text-end">Acciones</th>
+            `;
+        }
 
-        tbody.innerHTML = "";
-
+        // 2. Manejo de estado vacío
         if (items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No hay registros</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">No hay registros en esta categoría.</td></tr>`;
             return;
         }
 
-        items.forEach(item => {
-            // Aseguramos que los valores numéricos existan
-            const stock = Number(item.cantidad_unidades) || 0;
+        // 3. Renderizar filas
+        tbody.innerHTML = items.map(item => {
+            let stockDisplay = '';
             
-            // Lógica de colores según stock
-            const statusClass = stock < 30 ? 'status-critical' : (stock <= 45 ? 'status-warning' : 'status-ok');
-            const alertBadge = stock < 30 ? '<span class="badge bg-danger ms-2" style="font-size:0.6rem">PEDIR</span>' : '';
-            
-            // Lógica de caducidad
-            const esCaducado = item.caducidad && new Date(item.caducidad) < new Date();
+            if (tipoFiltro === 'fungible') {
+                stockDisplay = `
+                    <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill">
+                        <i class="fas fa-boxes me-1"></i> ${item.cantidad_unidades || 0} uds
+                    </span>`;
+            } else {
+                const porcentaje = item.cantidad_unidades || 0;
+                const color = porcentaje < 20 ? 'bg-danger' : (porcentaje < 50 ? 'bg-warning' : 'bg-success');
+                stockDisplay = `
+                    <div style="min-width: 100px;">
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span class="fw-bold">${porcentaje}%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar ${color}" style="width: ${porcentaje}%"></div>
+                        </div>
+                    </div>`;
+            }
 
-            tbody.innerHTML += `
+            return `
                 <tr>
                     <td class="ps-4">
-                        <div class="d-flex align-items-center">
-                            <span class="status-indicator ${statusClass}"></span>
-                            <div>
-                                <span class="fw-bold text-dark">${item.nombre}</span> ${alertBadge}<br>
-                                <small class="text-muted">${item.marca_fabricante || 'Sin marca'}</small>
-                            </div>
-                        </div>
+                        <div class="fw-bold text-dark">${item.nombre}</div>
+                        <small class="text-muted">${item.marca_fabricante || 'N/A'}</small>
                     </td>
-                    <td>
-                        <div class="d-flex align-items-center" style="min-width: 120px">
-                            <small class="me-2 fw-bold">${stock}%</small>
-                            <div class="progress flex-grow-1" style="height: 6px;">
-                                <div class="progress-bar ${stock < 30 ? 'bg-danger' : (stock <= 45 ? 'bg-warning' : 'bg-success')}" 
-                                     style="width: ${stock}%"></div>
-                            </div>
-                        </div>
-                    </td>
-                    ${tipoActual === 'reactivo' ? 
-                        `<td>${item.riqueza || '-'}%</td><td>${item.molaridad || '-'}M</td>` : 
-                        `<td>${item.capacidad || '-'} ml/g</td>`
-                    }
-                    <td>
-                        <div class="small"><b>Lote:</b> ${item.lote || '-'}</div>
-                        <div class="small ${esCaducado ? 'text-danger fw-bold' : 'text-muted'}">
-                            <b>Vence:</b> ${item.caducidad || 'S/F'}
-                        </div>
-                    </td>
-                    <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-light text-primary btn-editar" data-id="${item.id}">
-                            <i class="fas fa-pen"></i>
-                        </button>
-                        <button class="btn btn-sm btn-light text-danger btn-eliminar" data-id="${item.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <td>${stockDisplay}</td>
+                    <td><span class="badge bg-light text-dark border small">${item.laboratorio || 'N/A'}</span></td>
+                    <td class="small">${tipoFiltro === 'fungible' ? (item.marca_fabricante || '-') : (item.lote || '-')}</td>
+                    <td class="small">${tipoFiltro === 'fungible' ? (item.capacidad_especifica || '-') : (item.caducidad || '-')}</td>
+                    <td class="pe-4 text-end">
+                        <button class="btn btn-sm btn-light rounded-pill edit-btn" data-id="${item.id}"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-light rounded-pill delete-btn text-danger" data-id="${item.id}"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `;
-        });
+        }).join('');
     },
 
-    // Esta función oculta o muestra campos en el MODAL según el tipo seleccionado
     toggleCampos(tipo) {
-        // Seleccionamos los contenedores de los inputs por clase
-        const camposReactivo = document.querySelectorAll('.campo-reactivo'); // Riqueza, Molaridad
-        const camposFungible = document.querySelectorAll('.campo-equipo');    // Capacidad, Serial, etc.
-        
-        if (tipo === 'reactivo') {
-            camposReactivo.forEach(el => el.classList.remove('d-none'));
-            camposFungible.forEach(el => el.classList.add('d-none'));
+        // Ajusta la visibilidad de los campos especiales en el modal
+        const camposReactivo = document.querySelectorAll('.campo-reactivo');
+        const camposFungible = document.querySelectorAll('.campo-fungible');
+        const inputGroupText = document.querySelector('.input-group-text'); // El símbolo de %
+
+        if (tipo === 'fungible') {
+            camposReactivo.forEach(c => c.classList.add('d-none'));
+            camposFungible.forEach(c => c.classList.remove('d-none'));
         } else {
-            camposReactivo.forEach(el => el.classList.add('d-none'));
-            camposFungible.forEach(el => el.classList.remove('d-none'));
+            camposReactivo.forEach(c => c.classList.remove('d-none'));
+            camposFungible.forEach(c => c.classList.add('d-none'));
         }
     }
 };

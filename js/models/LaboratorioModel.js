@@ -35,19 +35,14 @@ export const LaboratorioModel = {
     return await getDocs(q);
     },
    async getCountEquipos(nombreLab, adminId) {
-        try {
-            const q = query(
-                collection(db, "equipos"), 
-                where("laboratorios", "==", nombreLab), 
-                where("adminId", "==", adminId)
-            );
-            const snapshot = await getDocs(q);
-            return snapshot.size; // Retorna el número de equipos encontrados
-        } catch (error) {
-            console.error("Error al contar equipos:", error);
-            return 0;
-        }
-    },
+    const q = query(
+        collection(db, "equipos"), 
+        where("laboratorio", "==", nombreLab),
+        where("adminId", "==", adminId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.size; // .size devuelve el total de documentos encontrados
+},
     async guardar(id, datos) {
         if (id) {
             const ref = doc(db, "laboratorios", id);
