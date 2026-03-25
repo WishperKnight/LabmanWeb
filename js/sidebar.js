@@ -19,7 +19,10 @@ export function cargarSidebar(paginaActiva) {
         <div class="collapse d-md-block sidebar shadow-sm" id="sidebarMenu">
             <div class="sidebar-header p-4 d-none d-md-block text-center">
                 <div class="brand-logo-small mb-2">
-                    <i class="fas fa-flask-vial text-white fa-2x"></i>
+                    <img src="./assets/img/icono.png" 
+                        class="img-fluid" 
+                        style="max-height: 60px; filter: brightness(0) invert(1);" 
+                        alt="Logo" />
                 </div>
                 <h5 class="fw-bold text-white m-0">Lab Manager</h5>
                 <p class="text-muted extra-small">Control de Calidad</p>

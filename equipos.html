@@ -36,11 +36,17 @@
                     <h2 class="fw-bold text-dark m-0">Gestión de Equipos</h2>
                     <p class="text-muted small m-0">Inventario técnico y control de stock operativo.</p>
                 </div>
+
                 <div class="d-flex gap-2">
-                    <label class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-bold mb-0" style="cursor: pointer;">
-                        <i class="fas fa-file-csv me-2"></i>Importar
+                    <button onclick="descargarPlantillaEquipos()" class="btn btn-light rounded-pill px-3 shadow-sm border fw-bold text-secondary small">
+                        <i class="fas fa-file-download me-2"></i>Plantilla
+                    </button>
+
+                    <label class="btn btn-outline-success rounded-pill px-4 shadow-sm fw-bold mb-0" style="cursor: pointer;">
+                        <i class="fas fa-upload me-2"></i>Importar CSV
                         <input type="file" id="input-csv" accept=".csv" hidden>
                     </label>
+
                     <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" id="btn-abrir-modal">
                         <i class="fas fa-plus me-2"></i>Nuevo Equipo
                     </button>
